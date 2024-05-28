@@ -1,0 +1,8 @@
+streamlit==1.35.0
+googlesearch-python==1.2.4
+aiohttp==3.9.3
+beautifulsoup4==4.12.2
+asyncio
+re
+google-generativeai==0.5.4
+sentence_transformers==2.7.0
