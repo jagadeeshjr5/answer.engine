@@ -8,7 +8,16 @@ import asyncio
 
 from typing import List, Any
 
+import json
+
 api_key = os.environ["API_KEY"] if "API_KEY" in os.environ else st.secrets["API_KEY"]
+
+def load_urls(file_path):
+    with open(file_path, 'r', encoding='utf-8') as file:
+        urls = file.read()  # Read the file contents as a string
+    # Manually load JSON
+    urls_json = json.loads(urls)
+    return urls_json
 
 def create_chunks(text : str):
     """
