@@ -98,5 +98,3 @@ class Model():
         response = self.model.generate_content(messages)
     
         return response.text
-    
-print(api_key)
