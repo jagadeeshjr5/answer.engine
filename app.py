@@ -23,8 +23,14 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 for message in st.session_state.messages:
-    with st.chat_message(message["role"], avatar= f"{urls['user']}" if message["role"] == 'user' else f"{urls['pageicon']}"):
-        st.markdown(message["parts"])
+
+    if message['role'] in ['user', 'assistant']:
+        with st.chat_message(message["role"], avatar= f"{urls['user']}" if message["role"] == 'user' else f"{urls['pageicon']}"):
+            st.markdown(message["parts"])
+    else:
+        with st.expander("See Reference Links"):
+            for url in message['reference_links']:
+                st.markdown(url, unsafe_allow_html=True)
 
 
 st.caption(
@@ -84,30 +90,31 @@ if prompt := st.chat_input("Ask me!"):
             {'role': 'user', 'parts': [prompt]}
         ]
         try:
-            with st.status("Processing..."):
-                    start_time = time.time()
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-                    st.write('Crawling web...')
-                    scraped_content, urls = loop.run_until_complete(run_scraper(prompt, num_urls))
-                    st.write('Prepraing context...')
-                    
-                    chunks = create_chunks(scraped_content)
-                    #context = loop.run_until_complete(amake_context(query=prompt, context=chunks, context_percentage=context_percentage))
-                    context = make_context(query=prompt, context=chunks, context_percentage=context_percentage)
-                    
-                    end_time = time.time()
-                    runtime = end_time - start_time
-                    st.write('Answering the query...')
+            with st.spinner("Processing..."):
+                start_time = time.time()
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                #st.write('Crawling web...')
+                scraped_content, urls = loop.run_until_complete(run_scraper(prompt, num_urls))
+                #st.write('Prepraing context...')
+                
+                chunks = create_chunks(scraped_content)
+                #context = loop.run_until_complete(amake_context(query=prompt, context=chunks, context_percentage=context_percentage))
+                context = make_context(query=prompt, context=chunks, context_percentage=context_percentage)
+                
+                end_time = time.time()
+                runtime = end_time - start_time
+                #st.write('Answering the query...')
 
-            st.write(f"Time taken to retreive the context: {runtime:.2f} seconds")
-            model = Model()
-            output = model.answer(query=prompt, context=context)
-            st.markdown(output)
-            with st.expander("See Reference Links"):
-                for url in urls:
-                    st.markdown(url, unsafe_allow_html=True)
+                st.write(f"{runtime:.2f} seconds")
+                model = Model()
+                output = model.answer(query=prompt, context=context)
+                st.markdown(output)
+                with st.expander("See Reference Links"):
+                    for url in urls:
+                        st.markdown(url, unsafe_allow_html=True)
             st.session_state.messages.append({"role": "assistant", "parts": output})
+            st.session_state.messages.append({"role" : "reference_links", "reference_links" : urls})
         except AttributeError as e:
             st.error("Error accessing the response content. Please check the response structure.")
             st.write(e)
