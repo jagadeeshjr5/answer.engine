@@ -1,12 +1,14 @@
 import google.generativeai as genai
 from sentence_transformers.util import cos_sim
 from datetime import datetime
+import streamlit as st
+import os
 
 import asyncio
 
 from typing import List, Any
 
-genai.configure(api_key='AIzaSyBpDFpC9EsOi2vijSnuY9IzM2k-ofV-mCQ')
+api_key = os.environ["API_KEY"] if "API_KEY" in os.environ else st.secrets["API_KEY"]
 
 def create_chunks(text : str):
     """
@@ -29,7 +31,7 @@ def get_embeddings(text : List):
     text : List (List of chunks)
     
     """
-    genai.configure(api_key='AIzaSyBpDFpC9EsOi2vijSnuY9IzM2k-ofV-mCQ')
+    genai.configure(api_key=api_key)
     embeddings = genai.embed_content(
     model="models/embedding-001",
     content=text,
@@ -68,7 +70,7 @@ def current_datetime():
 
 class Model():
     def __init__(self):
-        genai.configure(api_key='AIzaSyBpDFpC9EsOi2vijSnuY9IzM2k-ofV-mCQ')
+        genai.configure(api_key=api_key)
         generation_config=genai.types.GenerationConfig(
             max_output_tokens=1000,
                 temperature=1.0)
@@ -96,3 +98,5 @@ class Model():
         response = self.model.generate_content(messages)
     
         return response.text
+    
+print(api_key)
