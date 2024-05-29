@@ -86,8 +86,13 @@ class Model():
         
         messages = [
         {'role':'user',
-         'parts': [f"""You are the answer engine. Analyze the provided context carefully and answer the following question and give proper rational behind your response wherever it is needed. Use you skills to answer the query in the best way possible.
-                       Donot mention that you are referring a context to answer the query.
+         'parts': [f"""Answer the following question based on the provided context: 
+                   
+                       Question: {query} 
+                       Context: {context} 
+                       
+                       Please provide a clear and concise answer with rationae behind the response where necessary. Ensure the response is accurate and effective in conveying the correct information.
+                       Do not mention that you are referring to a context to answer the question.
                 
          
                       Question: {query}
