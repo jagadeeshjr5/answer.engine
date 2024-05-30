@@ -15,10 +15,4 @@ The search engine component of answer.engine crawls through the web to find and 
 **How to use this**
 
 **streamlit app:** 
-<Embed
-  html={false}
-  url="https://github.com/readmeio/api-explorer/pull/671"
-  title="RDMD CSS theming and style adjustments. by rafegoldberg · Pull Request #671 · readmeio/api-explorer"
-  favicon="https://github.com/favicon.ico"
-  image="https://avatars2.githubusercontent.com/u/6878153?s=400&v=4"
-/>
+[![github](https://cloud.githubusercontent.com/assets/17016297/18839843/0e06a67a-83d2-11e6-993a-b35a182500e0.png)][http://www.github.com/jagadeeshjr5]
