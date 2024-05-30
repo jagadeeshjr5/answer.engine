@@ -46,12 +46,7 @@ Percentage of context: The percentage of scraped text to be sent to the language
 7. Much more...
 
 
-
-
-
-
-
-
+**Socials**
 
 <a href="https://www.linkedin.com/in/jagadeeshreddyjr5" target="_blank">
   <img src="https://drive.google.com/uc?export=view&id=1pV2htPGXsvMXONeFv_qdyHMkn_TgYp5U" alt="LinkedIn" width="25" height="25">
