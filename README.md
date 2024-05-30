@@ -31,20 +31,23 @@ python answerengine.py
 
 **Parameters**
 
-Number of references: The maximum number of URLs to fetch (up to 10).
+Number of references: The maximum number of URLs to fetch (up to 10). Decreasing this will perform a narrower search, while increasing it will perform a wider search.
 
 Percentage of context: The percentage of scraped text to be sent to the language model for answering the user's query.
 
+
+Tweaking these parameters will change the answer.engine's output behaviour.
+
+
 **What's next?**
 
-1. Memory module.
-2. Knowledge caching.
-3. Session history caching.
-4. Agents.
-5. Access to multiple live datasources and APIs.
+1. Agents
+2. Access to multiple live datasources and APIs.
+3. Memory module.
+4. Session history caching.
+5. Knowledge caching.
 6. Advanced web scraper.
 7. Much more...
-
 
 **Socials**
 
