@@ -16,4 +16,6 @@ The search engine component of answer.engine crawls through the web to find and 
 
 **streamlit app:** 
 
-[![GitHub](https://drive.google.com/uc?export=view&id=1KDxCwWOzvi7JftyOd1LWHhFFtzgNbVhO)](https://github.com/jagadeeshjr5)
+<a href="https://github.com/jagadeeshjr5">
+  <img src="https://drive.google.com/uc?export=view&id=1KDxCwWOzvi7JftyOd1LWHhFFtzgNbVhO" alt="GitHub" width="100" height="100">
+</a>
