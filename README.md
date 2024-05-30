@@ -20,4 +20,10 @@ The search engine component of answer.engine crawls through the web to find and 
   <img src="https://drive.google.com/uc?export=view&id=1KDxCwWOzvi7JftyOd1LWHhFFtzgNbVhO" alt="answer.engine" width="50" height="50">
 </a>
 
+or
 
+```
+!git clone https://github.com/jagadeeshjr5/answerdotengine.git
+python answerengine.py
+
+```
