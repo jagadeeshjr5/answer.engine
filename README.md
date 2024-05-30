@@ -20,7 +20,9 @@ The search engine component of answer.engine crawls through the web to find and 
   <img src="https://drive.google.com/uc?export=view&id=1KDxCwWOzvi7JftyOd1LWHhFFtzgNbVhO" alt="answer.engine" width="35" height="35">
 </a>
 
+
 or
+
 
 ```
 !git clone https://github.com/jagadeeshjr5/answerdotengine.git
@@ -42,3 +44,9 @@ Percentage of context: The percentage of scraped text to be sent to the language
 5. Access to multiple live datasources and APIs.
 6. Advanced web scraper.
 7. Much more...
+
+
+
+<a href="linkedin.com/in/jagadeeshreddyjr5" target="_blank">
+  <img src="https://drive.google.com/file/d/1pV2htPGXsvMXONeFv_qdyHMkn_TgYp5U" alt="LinkedIn" width="25" height="25">
+</a>
