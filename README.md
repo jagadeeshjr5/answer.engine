@@ -1,6 +1,6 @@
 # answer.engine (answer dot engine)
 
-**answer.engine** is an AI powered answer engine which answers users query by crawling through web in real time. It works in a series fashion by executing one component at a time.
+**answer.engine** is an AI-powered answer engine that answers users' queries by crawling the web in real time. It works in a series fashion by executing one component at a time.
 
 **Key components:**
 1. Search engine.
