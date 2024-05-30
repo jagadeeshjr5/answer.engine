@@ -16,4 +16,4 @@ The search engine component of answer.engine crawls through the web to find and 
 
 **streamlit app:** 
 
-[![GitHub](https://drive.google.com/file/d/1KDxCwWOzvi7JftyOd1LWHhFFtzgNbVhO/view?usp=sharing)](https://github.com/jagadeeshjr5)
+[![GitHub](https://drive.google.com/uc?export=view&id=1KDxCwWOzvi7JftyOd1LWHhFFtzgNbVhO)](https://github.com/jagadeeshjr5)
