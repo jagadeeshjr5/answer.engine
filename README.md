@@ -26,7 +26,7 @@ or
 
 ```
 !git clone https://github.com/jagadeeshjr5/answerdotengine.git
-python answerengine.py
+python src/answerengine.py
 ```
 
 **Parameters**
