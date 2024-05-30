@@ -25,5 +25,19 @@ or
 ```
 !git clone https://github.com/jagadeeshjr5/answerdotengine.git
 python answerengine.py
-
 ```
+
+**Parameters**
+
+Number of references: The maximum number of URLs to fetch (up to 10).
+Percentage of context: The percentage of scraped text to be sent to the language model for answering the user's query.
+
+**What's next?**
+
+1. Memory module.
+2. Knowledge caching.
+3. Session history caching.
+4. Agents.
+5. Access to multiple live datasources and APIs.
+6. Advanced web scraper.
+7. Much more...
