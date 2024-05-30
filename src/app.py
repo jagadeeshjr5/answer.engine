@@ -5,7 +5,7 @@ from utils import create_chunks, get_embeddings, make_context, Model, load_urls
 
 import time
 
-urls = load_urls(r'src\urls.txt')
+urls = load_urls(r'src/urls.txt')
 
 async def run_scraper(query, num_urls):
     scraped_content, urls = await scrape(query, num_urls)
