@@ -49,7 +49,9 @@ Tweaking these parameters will change the answer.engine's output behaviour.
 4. Session history caching.
 5. Knowledge caching.
 6. Advanced web scraper.
-7. Much more...
+7. Multimodality
+8. More search engines
+9. Much more...
 
 **Socials**
 
