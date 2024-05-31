@@ -1,6 +1,6 @@
 # answer.engine (answer dot engine)
 
-**answer.engine** is an AI-powered answer engine that answers users' queries by crawling the web in real time. It is built on top of google search and gemini.
+**answer.engine** is an AI-powered answer engine that answers users' queries by crawling the web in real time. It is built on top of Google Search and Gemini.
 
 **Key components:**
 1. Search engine.
