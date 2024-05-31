@@ -1,6 +1,6 @@
 # answer.engine (answer dot engine)
 
-**answer.engine** is an AI-powered answer engine that answers users' queries by crawling the web in real time. It works in a series fashion by executing one component at a time.
+**answer.engine** is an AI-powered answer engine that answers users' queries by crawling the web in real time. It is built on top of google search and gemini.
 
 **Key components:**
 1. Search engine.
@@ -31,9 +31,9 @@ python src/answerengine.py
 
 **Parameters**
 
-Number of references: The maximum number of URLs to fetch (up to 10). Decreasing this will perform a narrower search, while increasing it will perform a wider search.
+Number of references (Default 5): The maximum number of URLs to fetch (up to 10). Decreasing this will perform a narrower search, while increasing it will perform a wider search.
 
-Percentage of context: The percentage of scraped text to be sent to the language model for answering the user's query.
+Percentage of context (Default 50%): The percentage of scraped text to be sent to the language model for answering the user's query. The hypothesis here is that 30% of the given raw scraped text is junk, and only about 50% truly contributes to answering the query.
 
 
 Tweaking these parameters will change the answer.engine's output behaviour.
