@@ -114,11 +114,11 @@ if prompt := st.chat_input("Ask me!"):
                 st.write(f"{runtime:.2f} seconds")
                 model = Model(operation='answer')
                 output =  model.answer(query=prompt, context=context)
-                st.write_stream(output)
+                output_str = st.write_stream(output)
                 with st.expander("See Reference Links"):
                     for url in urls:
                         st.markdown(url, unsafe_allow_html=True)
-            st.session_state.messages.append({"role": "assistant", "parts": ""})
+            st.session_state.messages.append({"role": "assistant", "parts": output_str})
             st.session_state.messages.append({"role" : "reference_links", "reference_links" : urls})
         except AttributeError as e:
             st.error("Error accessing the response content. Please check the response structure.")
