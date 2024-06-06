@@ -2,11 +2,11 @@ import streamlit as st
 import asyncio
 from scraper import scrape
 from utils import create_chunks, get_embeddings, make_context, load_urls
-
 from model import Model
-
-
 import time
+import nest_asyncio
+
+nest_asyncio.apply()
 
 urls = load_urls(r'src/urls.txt')
 
@@ -14,10 +14,20 @@ async def run_scraper(query, num_urls):
     scraped_content, urls = await scrape(query, num_urls)
     return scraped_content, urls
 
+async def process_query(prompt, num_urls, context_percentage):
+    model = Model(operation='search')
+    search_query = model.search(query=prompt)
+
+    scraped_content, urls = await run_scraper(search_query, num_urls)
+
+    chunks = create_chunks(scraped_content)
+    context = await make_context(query=prompt, context=chunks, context_percentage=context_percentage)
+    
+    return context, urls
+
 st.set_page_config(
         page_title="answer.engine", page_icon=f"{urls['pageicon']}")
 
-#st.title(":blue[answer].engine")
 answer_color = "#c32148"
 
 st.markdown(f"<h1><span style='color:{answer_color};'>answer</span>.engine</h1>", unsafe_allow_html=True)
@@ -26,7 +36,6 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 for message in st.session_state.messages:
-
     if message['role'] in ['user', 'assistant']:
         with st.chat_message(message["role"], avatar= f"{urls['user']}" if message["role"] == 'user' else f"{urls['pageicon']}"):
             st.markdown(message["parts"])
@@ -34,7 +43,6 @@ for message in st.session_state.messages:
         with st.expander("See Reference Links"):
             for url in message['reference_links']:
                 st.markdown(url, unsafe_allow_html=True)
-
 
 st.caption(
     """
@@ -55,6 +63,7 @@ st.caption(
     """,
     unsafe_allow_html=True
 )
+
 with st.sidebar:
     st.subheader("No. of references")
     num_urls = st.slider(" ", min_value=1, max_value=10, value=5)
@@ -82,6 +91,7 @@ with st.sidebar:
         f'<div style="margin-top: 0.75em;"><a href="https://www.github.com/jagadeeshjr5" target="_blank"><img src="{urls["github"]}" alt="GitHub" height="25" width="25"></a></div>',
         unsafe_allow_html=True
     )
+
 if prompt := st.chat_input("Ask me!"):
 
     st.session_state.messages.append({"role": "user", "parts": prompt})
@@ -89,40 +99,29 @@ if prompt := st.chat_input("Ask me!"):
         st.markdown(prompt)
 
     with st.chat_message("assistant", avatar=f"{urls['pageicon']}"):
-        messages = [
-            {'role': 'user', 'parts': [prompt]}
-        ]
         try:
             with st.spinner("Processing..."):
                 start_time = time.time()
-                model = Model(operation='search')
+
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
-                search_query = model.search(query=prompt)
-                #st.write('Crawling web...')
-                scraped_content, urls = loop.run_until_complete(run_scraper(prompt, num_urls))
-                #st.write('Prepraing context...')
-                
-                chunks = create_chunks(scraped_content)
-                #context = loop.run_until_complete(amake_context(query=prompt, context=chunks, context_percentage=context_percentage))
-                context = make_context(query=prompt, context=chunks, context_percentage=context_percentage)
-                
+                context, reference_urls = loop.run_until_complete(process_query(prompt, num_urls, context_percentage))
+
+                model = Model(operation='answer')
+
                 end_time = time.time()
                 runtime = end_time - start_time
-                #st.write('Answering the query...')
 
                 st.write(f"{runtime:.2f} seconds")
-                model = Model(operation='answer')
-                output =  model.answer(query=prompt, context=context)
+                output = model.answer(query=prompt, context=context)
                 output_str = st.write_stream(output)
+                
                 with st.expander("See Reference Links"):
-                    for url in urls:
+                    for url in reference_urls:
                         st.markdown(url, unsafe_allow_html=True)
+
             st.session_state.messages.append({"role": "assistant", "parts": output_str})
-            st.session_state.messages.append({"role" : "reference_links", "reference_links" : urls})
+            st.session_state.messages.append({"role": "reference_links", "reference_links": reference_urls})
         except AttributeError as e:
             st.error("Error accessing the response content. Please check the response structure.")
             st.write(e)
-
-
-
