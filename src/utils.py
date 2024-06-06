@@ -135,7 +135,7 @@ class Model():
                        Question: {query} 
                        Context: {context} 
                        
-                       Provide a clear and concise answer with rationale behind the response where necessary. Ensure the response is accurate and effective in conveying the correct information.
+                       Provide a clear and detailed answer with rationale behind the response where necessary. Ensure the response is accurate and effective in conveying the correct information.
                        Do not mention that you are referring to a context to answer the question.
                 
          
