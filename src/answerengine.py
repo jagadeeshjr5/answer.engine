@@ -12,13 +12,13 @@ async def run_scraper(query, num_urls):
 def answerdotengine():
     try:
         prompt  = str(input("Ask me! : "))
-        num_urls = 5
+        num_urls = 3
         context_percentage = 0.5
         start_time = time.time()
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         scraped_content, urls = loop.run_until_complete(run_scraper(prompt, num_urls))
-
+        
         chunks = create_chunks(scraped_content)
         context = make_context(query=prompt, context=chunks, context_percentage=context_percentage)
         end_time = time.time()  # Record end time
@@ -30,7 +30,6 @@ def answerdotengine():
         print(output)
 
     except Exception as e:
-
        print(e)
 
 if __name__ == "__main__":

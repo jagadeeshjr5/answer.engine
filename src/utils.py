@@ -3,6 +3,9 @@ from sentence_transformers.util import cos_sim
 from datetime import datetime
 import streamlit as st
 import os
+import multiprocessing
+
+import numpy as np
 
 import asyncio
 
@@ -46,6 +49,21 @@ def get_embeddings(text : List):
     content=text,
     task_type="clustering", output_dimensionality=128)
 
+    return embeddings['embedding']
+
+def parallel_embeddings(text_chunks: List[str]) -> List[np.ndarray]:
+    """
+    Generates embeddings for a list of text chunks in parallel.
+    
+    Args:
+    - text_chunks: List[str] : List of text chunks.
+    
+    Returns:
+    - List[np.ndarray]: List of embeddings for the text chunks.
+    """
+    num_cores = multiprocessing.cpu_count()
+    with multiprocessing.Pool(processes=num_cores) as pool:
+        embeddings = pool.map(get_embeddings, text_chunks)
     return embeddings
 
 def make_context(query : str, context : List, context_percentage : float):
@@ -61,9 +79,9 @@ def make_context(query : str, context : List, context_percentage : float):
 
 
     query_embedding = get_embeddings(query)
-    context_embeddings = get_embeddings(context)
+    context_embeddings = parallel_embeddings(context)
 
-    similarities = cos_sim(query_embedding['embedding'], context_embeddings['embedding'])
+    similarities = cos_sim([query_embedding], context_embeddings)
 
     output_context = ''
     context_chunksize = round(context_percentage*len(context)) if len(context) < 20 else 10
@@ -81,7 +99,7 @@ class Model():
     def __init__(self):
         genai.configure(api_key=api_key)
         generation_config=genai.types.GenerationConfig(
-            max_output_tokens=1000,
+            max_output_tokens=3000,
                 temperature=1.0)
         self.model = genai.GenerativeModel('gemini-1.5-pro-latest', generation_config=generation_config, safety_settings=[
     {

@@ -38,14 +38,13 @@ async def scrape(query, num_urls):
  
  
     for url, soup in zip(urls, htmls):
-        keywords = ['weather', 'India']
         try:
-            #tags_with_keywords = soup.find_all(lambda tag: tag.name in ['p', 'title', 'div'] and tag.string)
-            tags_with_keywords = soup.get_text()
+            tags = soup.find_all(lambda tag: tag.name in ['p', 'title', 'div'] and tag.string)
+            #tags = soup.get_text()
 
-            #for tag in tags_with_keywords:
-             #   scraped = scraped + tag.get_text()
-            scraped_content = scraped_content + tags_with_keywords
+            for tag in tags:
+                scraped_content = scraped_content + tag.get_text()
+            #scraped_content = scraped_content + tags
         except:
             pass
 
