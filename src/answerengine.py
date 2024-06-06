@@ -23,17 +23,13 @@ async def main():
         
         scraped_content, urls = await run_scraper(search_query, num_urls)
         chunks = create_chunks(scraped_content)
-        context = make_context(query=prompt, context=chunks, context_percentage=context_percentage)
+        context = await make_context(query=prompt, context=chunks, context_percentage=context_percentage)
         end_time = time.time()
         runtime = end_time - start_time
         
         model = Model(operation='answer')
         for token in model.answer(query=prompt, context=context):
             print(token, end='')
-
-        output = model.answer(query=prompt, context=context)
-        print(''.join(list(output)))
-        print(output)
         #print(answer)
     except Exception as e:
         print(e)
