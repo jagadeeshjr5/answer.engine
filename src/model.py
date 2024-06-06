@@ -16,40 +16,56 @@ class Model():
 
         self.system_instruction = pt.answer_systeminstruction() if self.operation == 'answer' else pt.search_systeminstruction()
         genai.configure(api_key=api_key)
-        generation_config=genai.types.GenerationConfig(
+        generation_config = genai.types.GenerationConfig(
             max_output_tokens=3000,
-                temperature=1.0)
-        self.model = genai.GenerativeModel('gemini-1.5-pro-latest', generation_config=generation_config, safety_settings=[
-    {
-        "category": "HARM_CATEGORY_HARASSMENT",
-        "threshold": "BLOCK_NONE",
-    },
-    {
-        "category": "HARM_CATEGORY_HATE_SPEECH",
-        "threshold": "BLOCK_NONE",
-    },
-    {
-        "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-        "threshold": "BLOCK_NONE",
-    },
-    {
-        "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-        "threshold": "BLOCK_NONE",
-    },
-], system_instruction=self.system_instruction)
-    
-    def answer(self, query, context=None):
-
+            temperature=1.0
+        )
+        self.model = genai.GenerativeModel(
+            'gemini-1.5-pro-latest',
+            generation_config=generation_config,
+            safety_settings=[
+                {
+                    "category": "HARM_CATEGORY_HARASSMENT",
+                    "threshold": "BLOCK_NONE",
+                },
+                {
+                    "category": "HARM_CATEGORY_HATE_SPEECH",
+                    "threshold": "BLOCK_NONE",
+                },
+                {
+                    "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                    "threshold": "BLOCK_NONE",
+                },
+                {
+                    "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                    "threshold": "BLOCK_NONE",
+                },
+            ],
+            system_instruction=self.system_instruction
+        )
+        
+    def search(self, query):
         """
         query : str
         context : str
-
         """
-        
-        messages = [
-        {'role':'user',
-         'parts': [pt.prompttemplate(query=query, context=context) if self.operation == 'answer' else query]}
-        ]
+        messages = [{'role': 'user', 'parts': [query]}]
         response = self.model.generate_content(messages)
-    
         return response.text
+    
+    def generate_responses(self, query, context):
+        messages = [
+            {
+                'role': 'user',
+                'parts': [f"""Answer the below query
+                            Query: {query}"""]
+            }
+        ]
+        # Continuously generate content
+        for response in self.model.generate_content(messages, stream=True):
+            for token in response:
+                yield token.text
+
+    def answer(self, query, context):
+        # Return a generator that yields each token
+        return self.generate_responses(query, context)

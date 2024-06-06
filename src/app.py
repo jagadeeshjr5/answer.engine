@@ -98,7 +98,7 @@ if prompt := st.chat_input("Ask me!"):
                 model = Model(operation='search')
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
-                search_query = model.answer(query=prompt)
+                search_query = model.search(query=prompt)
                 #st.write('Crawling web...')
                 scraped_content, urls = loop.run_until_complete(run_scraper(prompt, num_urls))
                 #st.write('Prepraing context...')
@@ -113,8 +113,8 @@ if prompt := st.chat_input("Ask me!"):
 
                 st.write(f"{runtime:.2f} seconds")
                 model = Model(operation='answer')
-                output = model.answer(query=prompt, context=context)
-                st.markdown(output)
+                output =  model.answer(query=prompt, context=context)
+                st.write_stream(output)
                 with st.expander("See Reference Links"):
                     for url in urls:
                         st.markdown(url, unsafe_allow_html=True)
