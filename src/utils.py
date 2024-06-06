@@ -95,55 +95,25 @@ def current_datetime():
     return datetime.now()
 
 
-class Model():
+class PromptTemplate():
     def __init__(self):
-        genai.configure(api_key=api_key)
-        generation_config=genai.types.GenerationConfig(
-            max_output_tokens=3000,
-                temperature=1.0)
-        self.model = genai.GenerativeModel('gemini-1.5-pro-latest', generation_config=generation_config, safety_settings=[
-    {
-        "category": "HARM_CATEGORY_HARASSMENT",
-        "threshold": "BLOCK_NONE",
-    },
-    {
-        "category": "HARM_CATEGORY_HATE_SPEECH",
-        "threshold": "BLOCK_NONE",
-    },
-    {
-        "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-        "threshold": "BLOCK_NONE",
-    },
-    {
-        "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-        "threshold": "BLOCK_NONE",
-    },
-])
-    
-    def answer(self, query, context):
+        pass
 
-        """
-        query : str
-        context : str
-
-        """
+    def prompttemplate(self, query : str, context : str):
         
-        messages = [
-        {'role':'user',
-         'parts': [f"""Answer the following question based on the provided context: 
+        return f"""Answer the following question based on the provided context: 
                    
-                       Question: {query} 
-                       Context: {context} 
-                       
-                       Provide a clear and detailed answer with rationale behind the response where necessary. Ensure the response is accurate and effective in conveying the correct information.
-                       Do not mention that you are referring to a context to answer the question.
-                
-         
-                      Question: {query}
-                      Context: 
-                      {context}
-                      """]}
-        ]
-        response = self.model.generate_content(messages)
+Question: {query} 
+Context: {context} 
+
+Provide a clear and detailed answer with rationale behind the response where necessary. Ensure the response is accurate and effective in conveying the correct information.
+Do not mention that you are referring to a context to answer the question.
+            """
     
-        return response.text
+    def answer_systeminstruction(self):
+        return """You are an answer engine. your name is answer.engine"""
+    
+    def search_systeminstruction(self):
+
+        return """You are a Google search engine query optimizer. Your task is to transform the user's input into an optimized Google search query that will yield the most relevant and accurate results. Ensure that the query is clear, concise, and includes key terms that directly pertain to the user's intent.
+You should return only a single sentence."""

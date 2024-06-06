@@ -1,7 +1,10 @@
 import streamlit as st
 import asyncio
 from scraper import scrape
-from utils import create_chunks, get_embeddings, make_context, Model, load_urls
+from utils import create_chunks, get_embeddings, make_context, load_urls
+
+from model import Model
+
 
 import time
 
@@ -92,8 +95,10 @@ if prompt := st.chat_input("Ask me!"):
         try:
             with st.spinner("Processing..."):
                 start_time = time.time()
+                model = Model(operation='search')
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
+                search_query = model.answer(query=prompt)
                 #st.write('Crawling web...')
                 scraped_content, urls = loop.run_until_complete(run_scraper(prompt, num_urls))
                 #st.write('Prepraing context...')
@@ -107,7 +112,7 @@ if prompt := st.chat_input("Ask me!"):
                 #st.write('Answering the query...')
 
                 st.write(f"{runtime:.2f} seconds")
-                model = Model()
+                model = Model(operation='answer')
                 output = model.answer(query=prompt, context=context)
                 st.markdown(output)
                 with st.expander("See Reference Links"):
