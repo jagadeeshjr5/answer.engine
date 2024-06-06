@@ -30,6 +30,10 @@ async def main():
         model = Model(operation='answer')
         for token in model.answer(query=prompt, context=context):
             print(token, end='')
+
+        output = model.answer(query=prompt, context=context)
+        print(''.join(list(output)))
+        print(output)
         #print(answer)
     except Exception as e:
         print(e)

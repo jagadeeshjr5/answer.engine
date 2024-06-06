@@ -118,7 +118,7 @@ if prompt := st.chat_input("Ask me!"):
                 with st.expander("See Reference Links"):
                     for url in urls:
                         st.markdown(url, unsafe_allow_html=True)
-            st.session_state.messages.append({"role": "assistant", "parts": output})
+            st.session_state.messages.append({"role": "assistant", "parts": ""})
             st.session_state.messages.append({"role" : "reference_links", "reference_links" : urls})
         except AttributeError as e:
             st.error("Error accessing the response content. Please check the response structure.")

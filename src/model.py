@@ -53,19 +53,14 @@ class Model():
         response = self.model.generate_content(messages)
         return response.text
     
-    def generate_responses(self, query, context):
+
+    def answer(self, query, context):
         messages = [
             {
                 'role': 'user',
-                'parts': [f"""Answer the below query
-                            Query: {query}"""]
+                'parts': [pt.prompttemplate(query, context)]
             }
         ]
-        # Continuously generate content
         for response in self.model.generate_content(messages, stream=True):
             for token in response:
                 yield token.text
-
-    def answer(self, query, context):
-        # Return a generator that yields each token
-        return self.generate_responses(query, context)
