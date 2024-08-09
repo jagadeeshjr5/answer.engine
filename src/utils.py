@@ -30,9 +30,14 @@ def create_chunks(text : str):
     
     """
     tokens = text.split(' ')
+
     chunk_size = int(round(0.1 * len(tokens))) if len(tokens) < 3000 else 300
     overlap = int(round(0.1*chunk_size))
-    chunks = [' '.join(tokens[i : i + chunk_size]) for i in range(0, len(tokens), chunk_size - overlap)]
+
+    step_size = chunk_size - overlap
+    if step_size <= 0:
+        step_size = 1
+    chunks = [' '.join(tokens[i : i + chunk_size]) for i in range(0, len(tokens), step_size)]
     return chunks
 
 async def get_embeddings(text : List[str]):
@@ -115,7 +120,7 @@ Question: {query}
 Context: {context} 
 
 Provide a clear and detailed answer with rationale behind the response where necessary. Ensure the response is accurate and effective in conveying the correct information.
-Do not mention that you are referring to a context to answer the question.
+Do not mention that you are referring to a context to answer the question. If the provided context is not relevant or empty then return ```I'm sorry! I couldn't find much information about this query. Please try asking in other way.```
             """
     
     def answer_systeminstruction(self):

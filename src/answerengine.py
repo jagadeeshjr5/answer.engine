@@ -9,19 +9,19 @@ async def run_scraper(query, num_urls):
     return scraped_content, urls
 
 async def main():
+    model = Model(operation='search')
+    prompt = input("Ask me! : ")
+    num_urls = 3
+    context_percentage = 0.5
+    start_time = time.time()
+
     try:
-        model = Model(operation='search')
-        prompt = input("Ask me! : ")
-        num_urls = 3
-        context_percentage = 0.5
-        start_time = time.time()
-        
-        search_query = model.search(query=prompt)
-        print(search_query)
-        
-        # If model.search() returns None, handle it appropriately
-        
-        scraped_content, urls = await run_scraper(search_query, num_urls)
+        for _ in range(3):
+            search_query = model.search(query=prompt)
+            print(search_query)     
+            scraped_content, urls = await run_scraper(search_query, num_urls)
+            if scraped_content.strip():
+                break
         chunks = create_chunks(scraped_content)
         context = await make_context(query=prompt, context=chunks, context_percentage=context_percentage)
         end_time = time.time()
@@ -32,7 +32,8 @@ async def main():
             print(token, end='')
         #print(answer)
     except Exception as e:
-        print(e)
+        #print(e)
+        pass
 
 if __name__ == "__main__":
     asyncio.run(main())

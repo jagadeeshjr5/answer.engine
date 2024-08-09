@@ -16,10 +16,11 @@ async def run_scraper(query, num_urls):
 
 async def process_query(prompt, num_urls, context_percentage):
     model = Model(operation='search')
-    search_query = model.search(query=prompt)
-
-    scraped_content, urls = await run_scraper(search_query, num_urls)
-
+    for _ in range(3):
+        search_query = model.search(query=prompt)
+        scraped_content, urls = await run_scraper(search_query, num_urls)
+        if scraped_content.strip():
+            break
     chunks = create_chunks(scraped_content)
     context = await make_context(query=prompt, context=chunks, context_percentage=context_percentage)
     
@@ -122,6 +123,6 @@ if prompt := st.chat_input("Ask me!"):
 
             st.session_state.messages.append({"role": "assistant", "parts": output_str})
             st.session_state.messages.append({"role": "reference_links", "reference_links": reference_urls})
-        except AttributeError as e:
-            st.error("Error accessing the response content. Please check the response structure.")
-            st.write(e)
+        except Exception as e:
+            #st.error("Error accessing the response content. Please check the response structure.")
+            st.write("I'm sorry! I cannot answer the query at the moment. Try again later.")

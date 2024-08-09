@@ -17,7 +17,7 @@ class Model():
         self.system_instruction = pt.answer_systeminstruction() if self.operation == 'answer' else pt.search_systeminstruction()
         genai.configure(api_key=api_key)
         generation_config = genai.types.GenerationConfig(
-            max_output_tokens=3000,
+            max_output_tokens=5000,
             temperature=1.0
         )
         self.model = genai.GenerativeModel(
