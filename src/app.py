@@ -2,7 +2,7 @@ import streamlit as st
 import asyncio
 from scraper import scrape
 from utils import create_chunks, get_embeddings, make_context, load_urls
-from model import Model
+from model import Model, get_models
 import time
 import nest_asyncio
 
@@ -10,12 +10,16 @@ nest_asyncio.apply()
 
 urls = load_urls(r'src/urls.txt')
 
+models = get_models()
+default_model = 'models/gemini-1.5-pro-exp-0801'
+default_index = models.index(default_model)
+
 async def run_scraper(query, num_urls):
     scraped_content, urls = await scrape(query, num_urls)
     return scraped_content, urls
 
-async def process_query(prompt, num_urls, context_percentage):
-    model = Model(operation='search')
+async def process_query(prompt, num_urls, context_percentage, model):
+    model = Model(operation='search', model=model)
     for _ in range(3):
         search_query = model.search(query=prompt)
         scraped_content, urls = await run_scraper(search_query, num_urls)
@@ -73,6 +77,8 @@ with st.sidebar:
 
     st.markdown("---")
 
+    selected_model = st.sidebar.selectbox("Choose a model:", models, index=default_index)
+
     st.caption(
             """
             <div class="sidebar-footer">
@@ -106,9 +112,9 @@ if prompt := st.chat_input("Ask me!"):
 
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
-                context, reference_urls = loop.run_until_complete(process_query(prompt, num_urls, context_percentage))
+                context, reference_urls = loop.run_until_complete(process_query(prompt, num_urls, context_percentage, model=selected_model))
 
-                model = Model(operation='answer')
+                model = Model(operation='answer', model=selected_model)
 
                 end_time = time.time()
                 runtime = end_time - start_time
@@ -126,3 +132,4 @@ if prompt := st.chat_input("Ask me!"):
         except Exception as e:
             #st.error("Error accessing the response content. Please check the response structure.")
             st.write("I'm sorry! I cannot answer the query at the moment. Try again later.")
+            #st.write(e)
