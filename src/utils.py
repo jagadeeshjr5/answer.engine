@@ -5,6 +5,8 @@ import streamlit as st
 import os
 import multiprocessing
 
+from googleapiclient.discovery import build
+
 import numpy as np
 
 import asyncio
@@ -14,6 +16,7 @@ from typing import List, Any
 import json
 
 api_key = os.environ["API_KEY"] if "API_KEY" in os.environ else st.secrets["API_KEY"]
+youtube_api_key = os.environ["YOUTUBE_API_KEY"] if "YOUTUBE_API_KEY" in os.environ else st.secrets["YOUTUBE_API_KEY"]
 
 def load_urls(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
@@ -130,3 +133,23 @@ Do not mention that you are referring to a context to answer the question. If th
 
         return """You are a Google search engine query optimizer. Your task is to transform the user's input into an optimized Google search query that will yield the most relevant and accurate results. Ensure that the query is clear, concise, and includes key terms that directly pertain to the user's intent.
 You should return only a single sentence."""
+
+
+def youtube_search(query, max_results=5):
+    youtube = build('youtube', 'v3', developerKey=youtube_api_key)
+
+    request = youtube.search().list(
+        q=query,
+        part="snippet",
+        type="video",
+        maxResults=max_results
+    )
+    response = request.execute()
+
+    results = []
+    for item in response.get('items', []):
+        video_title = item['snippet']['title']
+        video_url = f"https://www.youtube.com/watch?v={item['id']['videoId']}"
+        results.append({'title': video_title, 'url': video_url})
+    
+    return results

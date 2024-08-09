@@ -6,6 +6,8 @@ from model import Model, get_models
 import time
 import nest_asyncio
 
+from utils import youtube_search
+
 nest_asyncio.apply()
 
 urls = load_urls(r'src/urls.txt')
@@ -28,7 +30,7 @@ async def process_query(prompt, num_urls, context_percentage, model):
     chunks = create_chunks(scraped_content)
     context = await make_context(query=prompt, context=chunks, context_percentage=context_percentage)
     
-    return context, urls
+    return search_query, context, urls
 
 st.set_page_config(
         page_title="answer.engine", page_icon=f"{urls['pageicon']}")
@@ -44,10 +46,19 @@ for message in st.session_state.messages:
     if message['role'] in ['user', 'assistant']:
         with st.chat_message(message["role"], avatar= f"{urls['user']}" if message["role"] == 'user' else f"{urls['pageicon']}"):
             st.markdown(message["parts"])
-    else:
+    elif message['role'] == 'reference_links':
         with st.expander("See Reference Links"):
             for url in message['reference_links']:
                 st.markdown(url, unsafe_allow_html=True)
+    else:
+        num_videos = len(message['youtube_urls'])
+        cols = st.columns(num_videos)
+
+        # Display videos in dynamically created columns
+        for i, col in enumerate(cols):
+            with col:
+                st.video(message['youtube_urls'][i], autoplay=True, muted=True)
+        
 
 st.caption(
     """
@@ -112,7 +123,7 @@ if prompt := st.chat_input("Ask me!"):
 
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
-                context, reference_urls = loop.run_until_complete(process_query(prompt, num_urls, context_percentage, model=selected_model))
+                search_query, context, reference_urls = loop.run_until_complete(process_query(prompt, num_urls, context_percentage, model=selected_model))
 
                 model = Model(operation='answer', model=selected_model)
 
@@ -122,6 +133,19 @@ if prompt := st.chat_input("Ask me!"):
                 st.write(f"{runtime:.2f} seconds")
                 output = model.answer(query=prompt, context=context)
                 output_str = st.write_stream(output)
+
+                results = youtube_search(search_query)
+
+                if results:
+                    video_urls = [result['url'] for result in results]
+
+                    num_videos = len(video_urls)
+                    cols = st.columns(num_videos)
+
+                    # Display videos in dynamically created columns
+                    for i, col in enumerate(cols):
+                        with col:
+                            st.video(video_urls[i], autoplay=True, muted=True)
                 
                 with st.expander("See Reference Links"):
                     for url in reference_urls:
@@ -129,6 +153,7 @@ if prompt := st.chat_input("Ask me!"):
 
             st.session_state.messages.append({"role": "assistant", "parts": output_str})
             st.session_state.messages.append({"role": "reference_links", "reference_links": reference_urls})
+            st.session_state.messages.append({"role": "youtube_urls", "youtube_urls": video_urls})
         except Exception as e:
             #st.error("Error accessing the response content. Please check the response structure.")
             st.write("I'm sorry! I cannot answer the query at the moment. Try again later or choose another model.")
