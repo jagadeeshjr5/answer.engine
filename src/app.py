@@ -11,7 +11,7 @@ nest_asyncio.apply()
 urls = load_urls(r'src/urls.txt')
 
 models = get_models()
-default_model = 'models/gemini-1.5-pro-exp-0801'
+default_model = 'gemini-1.5-pro-exp-0801'
 default_index = models.index(default_model)
 
 async def run_scraper(query, num_urls):
@@ -131,5 +131,5 @@ if prompt := st.chat_input("Ask me!"):
             st.session_state.messages.append({"role": "reference_links", "reference_links": reference_urls})
         except Exception as e:
             #st.error("Error accessing the response content. Please check the response structure.")
-            st.write("I'm sorry! I cannot answer the query at the moment. Try again later.")
+            st.write("I'm sorry! I cannot answer the query at the moment. Try again later or choose another model.")
             #st.write(e)

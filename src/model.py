@@ -10,7 +10,9 @@ api_key = os.environ["API_KEY"] if "API_KEY" in os.environ else st.secrets["API_
 pt = PromptTemplate()
 
 def get_models():
+    genai.configure(api_key=api_key)
     models = [model.name for model in genai.list_models() if 'generateContent' in model.supported_generation_methods]
+    models = [model[7:] for model in models]
     return models
     
 
