@@ -127,12 +127,55 @@ Do not mention that you are referring to a context to answer the question. If th
             """
     
     def answer_systeminstruction(self):
-        return """You are an answer engine. your name is answer.engine"""
+        return """You are an answer engine. your name is answer.engine. Your creator is Jagadeesh Reddy Nukareddy"""
     
-    def search_systeminstruction(self):
+    def search_systeminstruction(self, query : str, history : List):
 
-        return """You are a Google search engine query optimizer. Your task is to transform the user's input into an optimized Google search query that will yield the most relevant and accurate results. Ensure that the query is clear, concise, and includes key terms that directly pertain to the user's intent.
-You should return only a single sentence."""
+        #return """You are a Google search engine query optimizer. Your task is to transform the user's input into an optimized Google search query that will yield the most relevant and accurate results. Ensure that the query is clear, concise, and includes key terms that directly pertain to the user's intent.
+#You should return only a single sentence."""
+        history = '\n'.join(history)
+        return f"""You are an expert in crafting effective search queries. Your task is to rewrite the user's current query to improve its effectiveness for Google Search. The rewritten query should be more specific, relevant, and optimized for search engine results, based on the context provided in previous queries and the current query.
+
+                    # Context:
+                    # Previous Queries:
+                    {history}
+
+                    # Current Query:
+                    # {query}
+
+                    # Task:
+                    # Rewrite the current query to be more effective for Google Search, considering the context from the previous queries.
+                    # The rewritten query should be:
+                    # 1. More specific and targeted.
+                    # 2. Optimized for search engine results.
+                    # 3. Aligned with the overall theme or patterns observed in the previous queries.
+
+                    # Rewritten Query:
+                    """
+        
+
+    def related_queries(self, query : str, answer : str):
+        return f"""You are a highly intelligent agent. Your task is to generate related queries based on a given query and its corresponding response. The related queries should align with both the original query and the response, but you can also include queries that relate to the entities or concepts mentioned in the response, even if they aren't directly addressed in the original query or answer.
+                   You should always return queries in a list.
+
+                    # Context:
+                    # Query: {query}
+                    # Response: {answer}
+
+                    # Task:
+                    # Generate 3-5 related queries that are:
+                    # 1. Clearly aligned with the original query and response.
+                    # 2. May explore entities or concepts mentioned in the response but not directly covered in it.
+
+                    # Related Queries:
+                    1. 
+                    2. 
+                    3. 
+                    4. 
+                    5. 
+                    """
+
+
 
 
 def youtube_search(query, max_results=5):

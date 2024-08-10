@@ -5,6 +5,8 @@ import streamlit as st
 
 from utils import PromptTemplate
 
+import json
+
 api_key = os.environ["API_KEY"] if "API_KEY" in os.environ else st.secrets["API_KEY"]
 
 pt = PromptTemplate()
@@ -22,11 +24,18 @@ class Model():
         self.operation = operation
         self.model = model
 
-        self.system_instruction = pt.answer_systeminstruction() if self.operation == 'answer' else pt.search_systeminstruction()
+        self.response_type = "application/json" if self.operation == 'related_queries' else None
+
+        self.system_instruction = (
+            pt.answer_systeminstruction() if self.operation == 'answer' 
+            else None if self.operation == 'search' 
+            else None
+        )
+
         genai.configure(api_key=api_key)
         generation_config = genai.types.GenerationConfig(
             max_output_tokens=5000,
-            temperature=1.0
+            temperature=1.0, response_mime_type=self.response_type
         )
         self.model = genai.GenerativeModel(
             self.model,
@@ -52,12 +61,12 @@ class Model():
             system_instruction=self.system_instruction
         )
         
-    def search(self, query):
+    def search(self, query, history):
         """
         query : str
         context : str
         """
-        messages = [{'role': 'user', 'parts': [query]}]
+        messages = [{'role': 'user', 'parts': [pt.search_systeminstruction(query=query, history=history)]}]
         response = self.model.generate_content(messages)
         return response.text
     
@@ -72,3 +81,14 @@ class Model():
         for response in self.model.generate_content(messages, stream=True):
             for token in response:
                 yield token.text
+    
+    def related_queries(self, query, answer):
+        messages = [
+            {
+                'role': 'user',
+                'parts': [pt.related_queries(query=query, answer=answer)]
+            }
+        ]
+        response = self.model.generate_content(messages)
+        response = json.loads(response.text)
+        return response
