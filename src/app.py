@@ -214,7 +214,7 @@ if prompt := st.chat_input("Ask me!"):
             #if related:
             #    st.session_state.messages.append({"role": "related_queries", "related_queries": related})
             st.session_state.messages.append({'role' : 'history', 'history' : history})
-            st.write(history)
+            #st.write(history)
         except Exception as e:
             #st.error("Error accessing the response content. Please check the response structure.")
             st.write("I'm sorry! I cannot answer the query at the moment. Try again later or choose another model.")
