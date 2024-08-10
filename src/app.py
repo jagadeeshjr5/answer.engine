@@ -8,9 +8,6 @@ import nest_asyncio
 
 from utils import youtube_search
 
-import markdownlit as mdlit
-from streamlit_extras.markdownlit import textwrap
-
 nest_asyncio.apply()
 
 urls = load_urls(r'src/urls.txt')
