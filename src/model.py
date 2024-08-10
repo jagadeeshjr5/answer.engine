@@ -8,20 +8,21 @@ from utils import PromptTemplate
 import json
 
 api_key = os.environ["API_KEY"] if "API_KEY" in os.environ else st.secrets["API_KEY"]
-api_key1 = "AIzaSyBHu3EJUtRPeWZXh0rgZFPs7Sqk0nzAuDY"
-api_key2 = "AIzaSyCk0rWSuGaXImcVBjVTo4wqFwZ7fyX_BY0"
+api_key1 = os.environ["API_KEY"] if "API_KEY1" in os.environ else st.secrets["API_KEY1"]
+api_key2 = os.environ["API_KEY"] if "API_KEY2" in os.environ else st.secrets["API_KEY2"]
+api_key3 = os.environ["API_KEY"] if "API_KEY3" in os.environ else st.secrets["API_KEY3"]
 
 pt = PromptTemplate()
 
 def get_models():
-    genai.configure(api_key=api_key)
+    genai.configure(api_key=api_key3)
     models = [model.name for model in genai.list_models() if 'generateContent' in model.supported_generation_methods]
     models = [model[7:] for model in models]
     return models
     
 
 class Model():
-    def __init__(self, operation : str, model : str):
+    def __init__(self, operation : str, model : str, api_key : str):
 
         self.operation = operation
         self.model = model
@@ -34,7 +35,7 @@ class Model():
             else None
         )
 
-        genai.configure(api_key=api_key1)
+        genai.configure(api_key=api_key)
         generation_config = genai.types.GenerationConfig(
             max_output_tokens=2000,
             temperature=1.0, response_mime_type=self.response_type
