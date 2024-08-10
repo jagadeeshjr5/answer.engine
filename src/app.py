@@ -13,9 +13,9 @@ from utils import youtube_search
 nest_asyncio.apply()
 
 api_key = os.environ["API_KEY"] if "API_KEY" in os.environ else st.secrets["API_KEY"]
-api_key1 = os.environ["API_KEY"] if "API_KEY1" in os.environ else st.secrets["API_KEY1"]
-api_key2 = os.environ["API_KEY"] if "API_KEY2" in os.environ else st.secrets["API_KEY2"]
-api_key3 = os.environ["API_KEY"] if "API_KEY3" in os.environ else st.secrets["API_KEY3"]
+api_key1 = os.environ["API_KEY1"] if "API_KEY1" in os.environ else st.secrets["API_KEY1"]
+api_key2 = os.environ["API_KEY2"] if "API_KEY2" in os.environ else st.secrets["API_KEY2"]
+api_key3 = os.environ["API_KEY3"] if "API_KEY3" in os.environ else st.secrets["API_KEY3"]
 
 urls = load_urls(r'src/urls.txt')
 
