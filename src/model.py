@@ -8,6 +8,8 @@ from utils import PromptTemplate
 import json
 
 api_key = os.environ["API_KEY"] if "API_KEY" in os.environ else st.secrets["API_KEY"]
+api_key1 = "AIzaSyBHu3EJUtRPeWZXh0rgZFPs7Sqk0nzAuDY"
+api_key2 = "AIzaSyCk0rWSuGaXImcVBjVTo4wqFwZ7fyX_BY0"
 
 pt = PromptTemplate()
 
@@ -32,9 +34,9 @@ class Model():
             else None
         )
 
-        genai.configure(api_key=api_key)
+        genai.configure(api_key=api_key1)
         generation_config = genai.types.GenerationConfig(
-            max_output_tokens=5000,
+            max_output_tokens=2000,
             temperature=1.0, response_mime_type=self.response_type
         )
         self.model = genai.GenerativeModel(

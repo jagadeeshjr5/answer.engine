@@ -16,6 +16,9 @@ from typing import List, Any
 import json
 
 api_key = os.environ["API_KEY"] if "API_KEY" in os.environ else st.secrets["API_KEY"]
+api_key1 = os.environ["API_KEY"] if "API_KEY1" in os.environ else st.secrets["API_KEY1"]
+api_key2 = os.environ["API_KEY"] if "API_KEY2" in os.environ else st.secrets["API_KEY2"]
+api_key3 = os.environ["API_KEY"] if "API_KEY3" in os.environ else st.secrets["API_KEY3"]
 youtube_api_key = os.environ["YOUTUBE_API_KEY"] if "YOUTUBE_API_KEY" in os.environ else st.secrets["YOUTUBE_API_KEY"]
 
 def load_urls(file_path):
@@ -133,7 +136,7 @@ Do not mention that you are referring to a context to answer the question. If th
 
         #return """You are a Google search engine query optimizer. Your task is to transform the user's input into an optimized Google search query that will yield the most relevant and accurate results. Ensure that the query is clear, concise, and includes key terms that directly pertain to the user's intent.
 #You should return only a single sentence."""
-        history = '\n'.join(history)
+        #history = '\n'.join(history)
         return f"""You are an expert in crafting effective search queries. Your task is to rewrite the user's current query to improve its effectiveness for Google Search. The rewritten query should be more specific, relevant, and optimized for search engine results, based on the context provided in previous queries and the current query.
 
                     # Context:

@@ -6,14 +6,21 @@ from model import Model, get_models
 import time
 import nest_asyncio
 
+import os
+
 from utils import youtube_search
 
 nest_asyncio.apply()
 
+api_key = os.environ["API_KEY"] if "API_KEY" in os.environ else st.secrets["API_KEY"]
+api_key1 = os.environ["API_KEY"] if "API_KEY1" in os.environ else st.secrets["API_KEY1"]
+api_key2 = os.environ["API_KEY"] if "API_KEY2" in os.environ else st.secrets["API_KEY2"]
+api_key3 = os.environ["API_KEY"] if "API_KEY3" in os.environ else st.secrets["API_KEY3"]
+
 urls = load_urls(r'src/urls.txt')
 
 models = get_models()
-default_model = 'gemini-1.5-pro-exp-0801'
+default_model = 'gemini-1.5-flash'
 default_index = models.index(default_model)
 
 async def run_scraper(query, num_urls):
@@ -21,7 +28,7 @@ async def run_scraper(query, num_urls):
     return scraped_content, urls
 
 async def process_query(prompt, num_urls, context_percentage, model, history):
-    model = Model(operation='search', model=model)
+    model = Model(operation='search', model=model, api_key=api_key1)
     for _ in range(3):
         search_query = model.search(query=prompt, history=history)
         scraped_content, urls = await run_scraper(search_query, num_urls)
@@ -59,6 +66,8 @@ for message in st.session_state.messages:
         with st.expander("See Reference Links"):
             for url in message['reference_links']:
                 st.markdown(url, unsafe_allow_html=True)
+    elif message['role'] == 'history':
+        history = message['history'][-5:]
     #elif message['role'] == 'related_queries':
     #    with st.expander("Related"):
     #        if message['related_queries']:
@@ -66,8 +75,7 @@ for message in st.session_state.messages:
     #                st.markdown(rel)
     #        else:
     #            st.markdown('none')
-    elif message['role'] == 'history':
-        history = message['history'][-5:]
+    
 
         
 
@@ -155,7 +163,7 @@ if prompt := st.chat_input("Ask me!"):
                 asyncio.set_event_loop(loop)
                 search_query, context, reference_urls = loop.run_until_complete(process_query(prompt, num_urls, context_percentage, model=selected_model, history=history))
 
-                model = Model(operation='answer', model=selected_model)
+                model = Model(operation='answer', model=selected_model, api_key=api_key2)
 
                 end_time = time.time()
                 runtime = end_time - start_time
@@ -188,7 +196,7 @@ if prompt := st.chat_input("Ask me!"):
 
                 #related = []
                 #try:
-                    #model = Model(operation='related_queries', model=selected_model)
+                    #model = Model(operation='related_queries', model=selected_model, api_key=api_key3)
                     #related = model.related_queries(query=prompt, answer=output_str)
                 #    with st.expander("Related"):
                 #        if related:
@@ -205,9 +213,9 @@ if prompt := st.chat_input("Ask me!"):
             st.session_state.messages.append({"role": "reference_links", "reference_links": reference_urls})
             #if related:
             #    st.session_state.messages.append({"role": "related_queries", "related_queries": related})
-            #st.session_state.messages.append({'role' : 'history', 'history' : history})
-            #st.write(history)
+            st.session_state.messages.append({'role' : 'history', 'history' : history})
+            st.write(history)
         except Exception as e:
             #st.error("Error accessing the response content. Please check the response structure.")
-            #st.write("I'm sorry! I cannot answer the query at the moment. Try again later or choose another model.")
-            st.write(e)
+            st.write("I'm sorry! I cannot answer the query at the moment. Try again later or choose another model.")
+            #st.write(e)
