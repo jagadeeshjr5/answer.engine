@@ -48,6 +48,4 @@ async def scrape(query, num_urls):
         # Clean up the scraped content
         scraped_content = re.sub(r'\s{2,}', ' ', re.sub(r'\n+', '\n', str(scraped_content)))
 
-        return scraped_content, urls
-    else:
-        return scraped_content, urls
+    return scraped_content, urls
