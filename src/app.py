@@ -219,5 +219,5 @@ if prompt := st.chat_input("Ask me!"):
             #st.write(history)
         except Exception as e:
             #st.error("Error accessing the response content. Please check the response structure.")
-            #st.write("I'm sorry! I cannot answer the query at the moment. Try again later or choose another model.")
-            st.write(e)
+            st.write("I'm sorry! I cannot answer the query at the moment. Try again later or choose another model.")
+            #st.write(e)
