@@ -1,6 +1,5 @@
 import streamlit as st
 import asyncio
-from scraper import scrape
 from utils import create_chunks, get_embeddings, make_context, load_urls
 from model import Model, get_models
 import time
@@ -109,6 +108,15 @@ with st.sidebar:
 
     enable_history = st.toggle("Enable memory:", )
 
+    selected_scraper = st.radio(
+        "**Select scraper**",
+        ["Basic", "Advanced"],
+        captions=[
+            "Uses beautifulsoup",
+            "Uses playwright"
+        ],
+    )
+
     selected_model = st.sidebar.selectbox('**Choose a model:**', models, index=default_index)
 
     text_contents = ''
@@ -147,6 +155,12 @@ with st.sidebar:
         f'<div style="margin-top: 0.75em;"><a href="https://www.github.com/jagadeeshjr5" target="_blank"><img src="{urls["github"]}" alt="GitHub" height="25" width="25"></a></div>',
         unsafe_allow_html=True
     )
+
+if selected_scraper == 'Basic':
+    from scraper import scrape
+elif selected_scraper == 'Advanced':
+    from playwright import scrape
+
 
 if prompt := st.chat_input("Ask me!"):
 

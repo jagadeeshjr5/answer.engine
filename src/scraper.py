@@ -4,6 +4,40 @@ import aiohttp
 import asyncio
 import time
 from bs4 import BeautifulSoup
+
+import re
+import html
+
+def clean_web_data(raw_data):
+    decoded_data = html.unescape(raw_data)
+
+    # Remove binary data and non-UTF characters
+    cleaned_data = re.sub(r'[^\x00-\x7F]+', ' ', decoded_data)
+    
+    # Replace multiple spaces, newlines, and tabs with a single space
+    cleaned_data = re.sub(r'\s+', ' ', cleaned_data)
+
+    # Remove common web-related text patterns (like "Terms of Use", etc.)
+    patterns_to_remove = [
+        r'Terms of Use', r'Privacy Statement', r'Report Vulnerability', 
+        r'Contact Us', r'Feedback', r'Created with Built by .*', r'Last Updated .*'
+    ]
+    for pattern in patterns_to_remove:
+        cleaned_data = re.sub(pattern, '', cleaned_data, flags=re.IGNORECASE)
+
+    # Remove leftover PDF-related garbage text
+    cleaned_data = re.sub(r'%PDF-[\d\.]+', '', cleaned_data)
+    cleaned_data = re.sub(r'endstream endobj', '', cleaned_data, flags=re.IGNORECASE)
+
+    # Remove any remaining excessive special characters
+    cleaned_data = re.sub(r'[^\w\s,.?!\-]', '', cleaned_data)
+
+    # Strip leading and trailing spaces
+    cleaned_data = cleaned_data.strip()
+
+    cleaned_data = re.sub(r'\s{2,}', ' ', re.sub(r'\n+', '\n', str(cleaned_data)))
+
+    return cleaned_data
  
  
 async def fetch_page(session, url):
@@ -45,7 +79,6 @@ async def scrape(query, num_urls):
                 text_content = soup.get_text()
                 scraped_content += text_content
 
-        # Clean up the scraped content
-        scraped_content = re.sub(r'\s{2,}', ' ', re.sub(r'\n+', '\n', str(scraped_content)))
+        scraped_content = clean_web_data(scraped_content)
 
     return scraped_content, urls
