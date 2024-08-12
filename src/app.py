@@ -159,7 +159,7 @@ with st.sidebar:
 if selected_scraper == 'Basic':
     from scraper import scrape
 elif selected_scraper == 'Advanced':
-    from playwright import scrape
+    from playwright_scraper import scrape
 
 
 if prompt := st.chat_input("Ask me!"):
