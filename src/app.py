@@ -29,7 +29,7 @@ async def run_scraper(query, num_urls):
 
 async def process_query(prompt, num_urls, context_percentage, model, history):
     model = Model(operation='search', model=model, api_key=api_key1)
-    for _ in range(10):
+    for _ in range(3):
         search_query = model.search(query=prompt, history=history, enable_history=enable_history)
         scraped_content, urls = await run_scraper(search_query, num_urls)
         if scraped_content.strip():
@@ -219,5 +219,5 @@ if prompt := st.chat_input("Ask me!"):
             #st.write(history)
         except Exception as e:
             #st.error("Error accessing the response content. Please check the response structure.")
-            st.write("I'm sorry! I cannot answer the query at the moment. Try again later or choose another model.")
-            #st.write(e)
+            #st.write("I'm sorry! I cannot answer the query at the moment. Try again later or choose another model.")
+            st.write(e)
