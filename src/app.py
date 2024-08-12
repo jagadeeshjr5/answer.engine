@@ -30,7 +30,7 @@ async def run_scraper(query, num_urls):
 async def process_query(prompt, num_urls, context_percentage, model, history):
     model = Model(operation='search', model=model, api_key=api_key1)
     for _ in range(3):
-        search_query = model.search(query=prompt, history=history)
+        search_query = model.search(query=prompt, history=history, enable_history=enable_history)
         scraped_content, urls = await run_scraper(search_query, num_urls)
         if scraped_content.strip():
             break
@@ -106,6 +106,8 @@ with st.sidebar:
     context_percentage = st.slider(" ", min_value=0.1, max_value=1.0, value=0.5)
 
     st.markdown("---")
+
+    enable_history = st.toggle("Enable history:", )
 
     selected_model = st.sidebar.selectbox('**Choose a model:**', models, index=default_index)
 
