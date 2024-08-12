@@ -7,8 +7,11 @@ from bs4 import BeautifulSoup
  
  
 async def fetch_page(session, url): 
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    }
     try:
-        async with session.get(url) as response:
+        async with session.get(url, headers=headers) as response:
             html_content = await response.text(encoding='utf-8', errors='ignore')
             html_content = await response.text(encoding='utf-8', errors='ignore')
             soup = BeautifulSoup(html_content, 'html.parser')
