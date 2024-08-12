@@ -64,12 +64,12 @@ class Model():
             system_instruction=self.system_instruction
         )
         
-    def search(self, query, history):
+    def search(self, query, history, enable_history = True):
         """
         query : str
         context : str
         """
-        messages = [{'role': 'user', 'parts': [pt.search_systeminstruction(query=query, history=history)]}]
+        messages = [{'role': 'user', 'parts': [pt.search_systeminstruction(query=query, history=history, enable_history=enable_history)]}]
         response = self.model.generate_content(messages)
         return response.text
     
