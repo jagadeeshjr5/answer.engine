@@ -107,7 +107,7 @@ with st.sidebar:
 
     st.markdown("---")
 
-    enable_history = st.toggle("Enable history:", )
+    enable_history = st.toggle("Enable memory:", )
 
     selected_model = st.sidebar.selectbox('**Choose a model:**', models, index=default_index)
 
