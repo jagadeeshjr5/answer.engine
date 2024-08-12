@@ -11,7 +11,7 @@ async def fetch_page(session, url):
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
     try:
-        async with session.get(url, headers=headers) as response:
+        async with session.get(url, headers=headers, ssl=False) as response:
             if response.status == 403:
                 print(f"Access Forbidden for URL: {url}")
                 return None
@@ -48,4 +48,6 @@ async def scrape(query, num_urls):
         # Clean up the scraped content
         scraped_content = re.sub(r'\s{2,}', ' ', re.sub(r'\n+', '\n', str(scraped_content)))
 
-    return scraped_content, urls
+        return scraped_content, urls
+    else:
+        return scraped_content, urls
