@@ -132,7 +132,7 @@ Do not mention that you are referring to a context to answer the question. If th
     def answer_systeminstruction(self):
         return """You are an answer engine. your name is answer.engine. Your creator is Jagadeesh Reddy Nukareddy"""
     
-    def search_systeminstruction(self, query : str, history : List, enable_history = True):
+    def search_systeminstruction(self, query : str, history : List, enable_history : str):
 
         if enable_history:
             history = '\n'.join(history)
@@ -155,8 +155,9 @@ Do not mention that you are referring to a context to answer the question. If th
                         # Rewritten Query:
                         """
         else:
-            return """You are a Google search engine query optimizer. Your task is to transform the user's input into an optimized Google search query that will yield the most relevant and accurate results. Ensure that the query is clear, concise, and includes key terms that directly pertain to the user's intent.
-#You should return only a single sentence."""
+            return f"""You are a Google search engine query optimizer. Your task is to transform the user's input into an optimized Google search query that will yield the most relevant and accurate results. Ensure that the query is clear, concise, and includes key terms that directly pertain to the user's intent.
+                       You should return only a single sentence.
+                       Query: {query}"""
         
 
     def related_queries(self, query : str, answer : str):
