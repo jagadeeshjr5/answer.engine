@@ -5,6 +5,8 @@ from model import Model, get_models
 import time
 import nest_asyncio
 import subprocess
+from scraper import scrape
+from playwright_scraper import scrape_content
 
 import os
 
@@ -23,22 +25,6 @@ urls = load_urls(r'src/urls.txt')
 models = get_models()
 default_model = 'gemini-1.5-flash'
 default_index = models.index(default_model)
-
-async def run_scraper(query, num_urls):
-    scraped_content, urls = await scrape(query, num_urls)
-    return scraped_content, urls
-
-async def process_query(prompt, num_urls, context_percentage, model, history):
-    model = Model(operation='search', model=model, api_key=api_key1)
-    for _ in range(3):
-        search_query = model.search(query=prompt, history=history, enable_history=enable_history)
-        scraped_content, urls = await run_scraper(search_query, num_urls)
-        if scraped_content.strip():
-            break
-    chunks = create_chunks(scraped_content)
-    context = await make_context(query=prompt, context=chunks, context_percentage=context_percentage)
-    
-    return search_query, context, urls
 
 st.set_page_config(
         page_title="answer.engine", page_icon=f"{urls['pageicon']}")
@@ -176,10 +162,25 @@ with st.sidebar:
         unsafe_allow_html=True
     )
 
-if selected_scraper == 'Basic':
-    from scraper import scrape
-elif selected_scraper == 'Advanced':
-    from playwright_scraper import scrape
+async def run_scraper(query, num_urls):
+    if selected_scraper == 'Basic':
+        scraped_content, urls = await scrape(query, num_urls)
+    elif selected_scraper == 'Advanced':
+        scraped_content, urls = await scrape_content(query, num_urls)
+    scraped_content, urls = await scrape(query, num_urls)
+    return scraped_content, urls
+
+async def process_query(prompt, num_urls, context_percentage, model, history):
+    model = Model(operation='search', model=model, api_key=api_key1)
+    for _ in range(3):
+        search_query = model.search(query=prompt, history=history, enable_history=enable_history)
+        scraped_content, urls = await run_scraper(search_query, num_urls)
+        if scraped_content.strip():
+            break
+    chunks = create_chunks(scraped_content)
+    context = await make_context(query=prompt, context=chunks, context_percentage=context_percentage)
+    
+    return search_query, context, urls
 
 
 if prompt := st.chat_input("Ask me!"):
