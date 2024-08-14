@@ -9,18 +9,19 @@ import subprocess
 import os
 
 from utils import youtube_search
+import shutil
 
 nest_asyncio.apply()
 
+@st.cache_resource
 def install_playwright():
     """Function to install Playwright browser dependencies."""
-    if 'playwright_installed' not in st.session_state:
-        # Run installation only if it hasn't been marked as done in the session state
+    if not shutil.which("playwright"):
         subprocess.run(["playwright", "install"], check=True)
         st.session_state['playwright_installed'] = True
         st.write("Playwright installed.")
     else:
-        st.write("Playwright installation already completed.")
+        st.write("Playwright is already installed.")
 
 # Place this at the start of your app to ensure it runs when the app is first loaded
 install_playwright()
