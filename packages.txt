@@ -16,6 +16,3 @@ libcairo2
 libasound2
 chromium
 chromium-driver
-chrome-linux
-chromium-1124
-chrome
