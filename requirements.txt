@@ -1,4 +1,4 @@
-streamlit==1.35.0
+streamlit>=1.37.0
 googlesearch-python==1.2.4
 aiohttp==3.9.4
 beautifulsoup4==4.12.2
@@ -6,4 +6,4 @@ google-generativeai==0.5.4
 sentence_transformers==2.7.0
 nest_asyncio==1.6.0
 playwright==1.45.1
-InstallWithPlaywright==0.1
+google-api-python-client==2.130.0
