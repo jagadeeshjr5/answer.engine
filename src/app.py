@@ -194,7 +194,9 @@ if prompt := st.chat_input("Ask me!"):
             with st.spinner("Processing..."):
                 start_time = time.time()
 
-                loop = asyncio.ProactorEventLoop()
+                #loop = asyncio.ProactorEventLoop()
+                #asyncio.set_event_loop(loop)
+                loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
                 search_query, context, reference_urls = loop.run_until_complete(process_query(prompt, num_urls, context_percentage, model=selected_model, history=history))
 
