@@ -8,21 +8,6 @@ import requests
 from bs4 import BeautifulSoup
 import concurrent.futures
 
-def install_playwright():
-    """Function to install Playwright browser dependencies."""
-    if 'playwright_installed' not in st.session_state:
-        # Run installation only if it hasn't been marked as done in the session state
-        subprocess.run(["playwright", "install"], check=True)
-        st.session_state['playwright_installed'] = True
-        st.write("Playwright installed.")
-    else:
-        st.write("Playwright installation already completed.")
-
-# Place this at the start of your app to ensure it runs when the app is first loaded
-install_playwright()
-
-os.system('playwright install-deps')
-os.system('playwright install')
 
 def clean_web_data(raw_data):
     decoded_data = html.unescape(raw_data)
