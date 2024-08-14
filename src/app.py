@@ -45,20 +45,18 @@ st.set_page_config(
 
 @st.cache_resource
 def install_playwright():
-    """Function to install Playwright browser dependencies."""
-    if not shutil.which("playwright"):
+    """Ensure Playwright and its dependencies are installed."""
+    if 'playwright_installed' not in st.session_state:
+        # Install Playwright and its browser dependencies
         subprocess.run(["playwright", "install"], check=True)
+        subprocess.run(["playwright", "install-deps"], check=True)
         st.session_state['playwright_installed'] = True
-        #st.write("Playwright installed.")
+        st.write("Playwright installed.")
     else:
-        pass
-        #st.write("Playwright is already installed.")
+        st.write("Playwright installation already completed.")
 
-# Place this at the start of your app to ensure it runs when the app is first loaded
+# Run this function at the start of your app
 install_playwright()
-
-os.system('playwright install-deps')
-os.system('playwright install')
 
 answer_color = "#c32148"
 
