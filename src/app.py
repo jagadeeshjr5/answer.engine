@@ -49,9 +49,11 @@ def install_playwright():
         # Run installation only if it hasn't been marked as done in the session state
         subprocess.run(["playwright", "install"], check=True)
         st.session_state['playwright_installed'] = True
-        st.write("Playwright installed.")
+        #st.write("Playwright installed.")
+        pass
     else:
-        st.write("Playwright installation already completed.")
+        pass
+        #st.write("Playwright installation already completed.")
 
 # Place this at the start of your app to ensure it runs when the app is first loaded
 install_playwright()
