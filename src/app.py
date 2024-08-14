@@ -13,19 +13,6 @@ import shutil
 
 nest_asyncio.apply()
 
-@st.cache_resource
-def install_playwright():
-    """Function to install Playwright browser dependencies."""
-    if not shutil.which("playwright"):
-        subprocess.run(["playwright", "install"], check=True)
-        st.session_state['playwright_installed'] = True
-        st.write("Playwright installed.")
-    else:
-        st.write("Playwright is already installed.")
-
-# Place this at the start of your app to ensure it runs when the app is first loaded
-install_playwright()
-
 #os.system('playwright install-deps')
 #os.system('playwright install')
 
@@ -58,6 +45,20 @@ async def process_query(prompt, num_urls, context_percentage, model, history):
 
 st.set_page_config(
         page_title="answer.engine", page_icon=f"{urls['pageicon']}")
+
+@st.cache_resource
+def install_playwright():
+    """Function to install Playwright browser dependencies."""
+    if not shutil.which("playwright"):
+        subprocess.run(["playwright", "install"], check=True)
+        st.session_state['playwright_installed'] = True
+        #st.write("Playwright installed.")
+    else:
+        pass
+        #st.write("Playwright is already installed.")
+
+# Place this at the start of your app to ensure it runs when the app is first loaded
+install_playwright()
 
 answer_color = "#c32148"
 
