@@ -13,9 +13,6 @@ import shutil
 
 nest_asyncio.apply()
 
-#os.system('playwright install-deps')
-#os.system('playwright install')
-
 api_key = os.environ["API_KEY"] if "API_KEY" in os.environ else st.secrets["API_KEY"]
 api_key1 = os.environ["API_KEY1"] if "API_KEY1" in os.environ else st.secrets["API_KEY1"]
 api_key2 = os.environ["API_KEY2"] if "API_KEY2" in os.environ else st.secrets["API_KEY2"]
@@ -59,6 +56,9 @@ def install_playwright():
 
 # Place this at the start of your app to ensure it runs when the app is first loaded
 install_playwright()
+
+os.system('playwright install-deps')
+os.system('playwright install')
 
 answer_color = "#c32148"
 
