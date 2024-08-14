@@ -90,7 +90,7 @@ async def fetch_all_pages(urls):
     results = '\n'.join(results)
     return results
 
-async def scrape(query, num_urls):
+async def scrape_content(query, num_urls):
     start_time = time.time()
     urls = []
     
