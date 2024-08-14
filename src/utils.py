@@ -120,13 +120,16 @@ class PromptTemplate():
 
     def prompttemplate(self, query : str, context : str):
         
-        return f"""Answer the following question based on the provided context: 
+        return f"""Answer the following question based on the provided context: \n
                    
-Question: {query} 
-Context: {context} 
+Question: \n 
+{query} \n
+Context: \n 
+{context} \n
 
-Provide a clear and detailed answer with rationale behind the response where necessary. Ensure the response is accurate and effective in conveying the correct information.
-Do not mention that you are referring to a context to answer the question. If the provided context is not relevant or empty then return ```I'm sorry! I couldn't find much information about this query. Please try asking in other way.```
+Provide a clear and detailed answer with rationale behind the response where necessary. Ensure the response is accurate and effective in conveying the correct information. \n
+Do not mention that you are referring to a context to answer the question. If the provided context is not relevant or empty then return ```I'm sorry! I couldn't find much information about this query. Please try asking in other way.``` \n
+You should always return output in markdown.
             """
     
     def answer_systeminstruction(self):

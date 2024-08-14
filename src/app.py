@@ -186,7 +186,7 @@ if prompt := st.chat_input("Ask me!"):
 
                 st.write(f"{runtime:.2f} seconds")
                 output = model.answer(query=prompt, context=context)
-                output_str = st.write_stream(output)
+                output_str = st.write_stream(output, )
 
                 video_urls = []
                 try:

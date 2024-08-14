@@ -4,6 +4,9 @@ import re
 import asyncio
 import time
 import html
+import requests
+from bs4 import BeautifulSoup
+import concurrent.futures
 
 def clean_web_data(raw_data):
     decoded_data = html.unescape(raw_data)
@@ -36,53 +39,76 @@ def clean_web_data(raw_data):
 
     return cleaned_data
 
-async def fetch_page_text(url):
-    #start_time = time.time()
+async def handle_request(route):
+    if route.request.resource_type in ["image", "stylesheet", "font", "style"]:
+        await route.abort()  # Abort image, stylesheet, and font requests to speed up loading
+    else:
+        await route.continue_()
+
+async def fetch_page_text_playwright(browser, context, url):
+    page = await context.new_page()
+    await page.route("**/*", handle_request)
+    try:
+        await page.goto(url, timeout=10000, wait_until="domcontentloaded")
+        try:
+            full_text = await page.locator('body').inner_text()
+        except:
+            full_text = await page.locator('body#app').inner_text()
+    except Exception as e:
+        full_text = ''
+    finally:
+        await page.close()
+        
+    return full_text
+
+def fetch_page_text_requests(url):
+    try:
+        response = requests.get(url, timeout=10)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        return soup.get_text()
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching page {url}: {e}")
+        return ''
+
+async def fetch_all_pages(urls):
     async with async_playwright() as playwright:
         browser = await playwright.chromium.launch(headless=True)
         context = await browser.new_context(user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
         
-        page = await context.new_page()
-        try:
-            # Navigate quickly with a short timeout and wait until "domcontentloaded"
-            await page.goto(url, timeout=10000, wait_until="domcontentloaded")
-            try:
-                full_text = await page.locator('body').inner_text()
-            except:
-                full_text = await page.locator('body#app').inner_text()
-        except Exception as e:
-            full_text = ''
-        finally:
-            await page.close()
-            await context.close()
-            await browser.close()
-        #end_time = time.time()
-        #print(f"Time taken: {end_time - start_time} seconds")
+        tasks = []
+        for url in urls:
+            if url.lower().endswith(('.html', '.htm')):
+                tasks.append(asyncio.to_thread(fetch_page_text_requests, url))
+            elif not url.lower().endswith('.pdf'):
+                tasks.append(fetch_page_text_playwright(browser, context, url))
         
-        return full_text
-
-async def fetch_all_pages(urls):
-    tasks = [fetch_page_text(url) for url in urls]
-    results = await asyncio.gather(*tasks)
+        results = await asyncio.gather(*tasks)
+        await context.close()
+        await browser.close()
+        
     results = '\n'.join(results)
     return results
 
 async def scrape(query, num_urls):
+    start_time = time.time()
     urls = []
     
     try:
         results = search(query, num_results=num_urls, lang="en")  # Assuming you have a search function defined elsewhere
     except Exception as e:
-        #print(e)
-        pass
-    
+        print(e)
+        
     if results:
         urls.extend(results)
     
     scraped_content = await fetch_all_pages(urls)
 
+    scraped_content = clean_web_data(scraped_content)
+
+    end_time = time.time()
+    print(f"Time taken: {end_time - start_time} sec")
+
     if scraped_content:
-    
         return scraped_content, urls
     else:
         return '', urls
