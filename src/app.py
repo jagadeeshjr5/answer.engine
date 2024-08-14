@@ -4,12 +4,29 @@ from utils import create_chunks, get_embeddings, make_context, load_urls
 from model import Model, get_models
 import time
 import nest_asyncio
+import subprocess
 
 import os
 
 from utils import youtube_search
 
 nest_asyncio.apply()
+
+def install_playwright():
+    """Function to install Playwright browser dependencies."""
+    if 'playwright_installed' not in st.session_state:
+        # Run installation only if it hasn't been marked as done in the session state
+        subprocess.run(["playwright", "install"], check=True)
+        st.session_state['playwright_installed'] = True
+        st.write("Playwright installed.")
+    else:
+        st.write("Playwright installation already completed.")
+
+# Place this at the start of your app to ensure it runs when the app is first loaded
+install_playwright()
+
+os.system('playwright install-deps')
+os.system('playwright install')
 
 api_key = os.environ["API_KEY"] if "API_KEY" in os.environ else st.secrets["API_KEY"]
 api_key1 = os.environ["API_KEY1"] if "API_KEY1" in os.environ else st.secrets["API_KEY1"]
@@ -175,7 +192,7 @@ if prompt := st.chat_input("Ask me!"):
             with st.spinner("Processing..."):
                 start_time = time.time()
 
-                loop = asyncio.new_event_loop()
+                loop = asyncio.ProactorEventLoop()
                 asyncio.set_event_loop(loop)
                 search_query, context, reference_urls = loop.run_until_complete(process_query(prompt, num_urls, context_percentage, model=selected_model, history=history))
 

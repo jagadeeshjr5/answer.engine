@@ -8,6 +8,22 @@ import requests
 from bs4 import BeautifulSoup
 import concurrent.futures
 
+def install_playwright():
+    """Function to install Playwright browser dependencies."""
+    if 'playwright_installed' not in st.session_state:
+        # Run installation only if it hasn't been marked as done in the session state
+        subprocess.run(["playwright", "install"], check=True)
+        st.session_state['playwright_installed'] = True
+        st.write("Playwright installed.")
+    else:
+        st.write("Playwright installation already completed.")
+
+# Place this at the start of your app to ensure it runs when the app is first loaded
+install_playwright()
+
+os.system('playwright install-deps')
+os.system('playwright install')
+
 def clean_web_data(raw_data):
     decoded_data = html.unescape(raw_data)
 
@@ -72,7 +88,7 @@ def fetch_page_text_requests(url):
 
 async def fetch_all_pages(urls):
     async with async_playwright() as playwright:
-        browser = await playwright.chromium.launch(headless=True)
+        browser = await playwright.chromium.launch(headless=True, chromium_sandbox=False)
         context = await browser.new_context(user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
         
         tasks = []
