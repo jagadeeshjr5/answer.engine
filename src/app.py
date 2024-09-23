@@ -108,11 +108,12 @@ with st.sidebar:
     st.subheader("No. of references")
     num_urls = st.slider(" ", min_value=1, max_value=10, value=5)
     st.subheader("Percentage of context to be used")
-    context_percentage = st.slider(" ", min_value=0.1, max_value=1.0, value=0.5)
+    context_percentage = st.slider(" ", min_value=0.1, max_value=1.0, value=0.75)
 
     st.markdown("---")
 
-    enable_history = st.toggle("Enable memory:", )
+    #enable_history = st.toggle("Enable memory:", )
+    enable_history = False
 
     selected_scraper = st.radio(
         "**Select scraper**",
@@ -123,7 +124,8 @@ with st.sidebar:
         ],
     )
 
-    selected_model = st.sidebar.selectbox('**Choose a model:**', models, index=default_index)
+    #selected_model = st.sidebar.selectbox('**Choose a model:**', models, index=default_index)
+    selected_model = 'gemini-1.5-flash'
 
     text_contents = ''
     
@@ -137,7 +139,7 @@ with st.sidebar:
                     text_contents += 'Reference Links:\n' + url
     
 
-    st.download_button("Download chat", text_contents, type='primary', file_name='chat.txt',)
+    #st.download_button("Download chat", text_contents, type='primary', file_name='chat.txt',)
 
     st.markdown("---")
 
@@ -233,18 +235,18 @@ if prompt := st.chat_input("Ask me!"):
                     for url in reference_urls:
                         st.markdown(url, unsafe_allow_html=True)
 
-                #related = []
-                #try:
-                    #model = Model(operation='related_queries', model=selected_model, api_key=api_key3)
-                    #related = model.related_queries(query=prompt, answer=output_str)
-                #    with st.expander("Related"):
-                #        if related:
-                #            for rel in related:
-                #                st.markdown(rel)
-                #        else:
-                #            st.markdown('none')
-                #except Exception as e:
-                #    pass      
+                related = []
+                try:
+                    model = Model(operation='related_queries', model=selected_model, api_key=api_key3)
+                    related = model.related_queries(query=prompt, answer=output_str)
+                    with st.expander("Related"):
+                        if related:
+                            for rel in related:
+                                st.markdown(rel)
+                        else:
+                            st.markdown('none')
+                except Exception as e:
+                    pass      
 
             st.session_state.messages.append({"role": "assistant", "parts": output_str})
             if video_urls:

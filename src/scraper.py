@@ -5,6 +5,8 @@ import asyncio
 import time
 from bs4 import BeautifulSoup
 
+from pdfparser import process_pdf_url
+
 import re
 import html
 
@@ -40,6 +42,11 @@ def clean_web_data(raw_data):
     return cleaned_data
  
  
+async def parse_pdf(url):
+    # Assuming process_pdf_url is defined to handle PDF parsing
+    pdf_text = await process_pdf_url(url)
+    return pdf_text
+
 async def fetch_page(session, url):
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
@@ -47,12 +54,15 @@ async def fetch_page(session, url):
     try:
         async with session.get(url, headers=headers, ssl=False) as response:
             if response.status == 403:
-                print(f"Access Forbidden for URL: {url}")
                 return None
             if response.status == 429:
-                print(f"Rate limit exceeded for URL: {url}. Retrying...")
-                await asyncio.sleep(5)  # Retry delay
+                await asyncio.sleep(1)  # Retry delay
                 return await fetch_page(session, url)
+            
+            # Check if the URL ends with .pdf
+            if url.lower().endswith('.pdf'):
+                return await parse_pdf(url)  # Call the PDF parser function
+            
             html_content = await response.text(encoding='utf-8', errors='ignore')
             soup = BeautifulSoup(html_content, 'html.parser')
             return soup
@@ -72,12 +82,16 @@ async def scrape(query, num_urls):
     if urls:
         async with aiohttp.ClientSession() as session:
             tasks = [fetch_page(session, url) for url in urls]
-            htmls = await asyncio.gather(*tasks)
+            contents = await asyncio.gather(*tasks)
     
-        for url, soup in zip(urls, htmls):
-            if soup:
-                text_content = soup.get_text()
-                scraped_content += text_content
+        for url, content in zip(urls, contents):
+            if content:
+                if isinstance(content, str):  # If it's PDF text
+                    scraped_content += content  # Add PDF content directly
+                    print(content)
+                else:  # If it's a BeautifulSoup object
+                    text_content = content.get_text()
+                    scraped_content += text_content  # Add HTML text content
 
         scraped_content = clean_web_data(scraped_content)
 

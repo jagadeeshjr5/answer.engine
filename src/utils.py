@@ -128,8 +128,10 @@ Context: \n
 {context} \n
 
 Provide a clear and detailed answer with rationale behind the response where necessary. Ensure the response is accurate and effective in conveying the correct information. \n
-Do not mention that you are referring to a context to answer the question. If the provided context is not relevant or empty then return ```I'm sorry! I couldn't find much information about this query. Please try asking in other way.``` \n
-You should always return output in markdown.
+Do not mention that you are referring to a context to answer the question.\n
+Give the answer in structured formats whereever necessary.\n
+If the provided context is not relevant or empty then return ```I'm sorry! I couldn't find much information about this query. Please try asking in other way.``` \n.
+
             """
     
     def answer_systeminstruction(self):
@@ -158,9 +160,17 @@ You should always return output in markdown.
                         # Rewritten Query:
                         """
         else:
-            return f"""You are a Google search engine query optimizer. Your task is to transform the user's input into an optimized Google search query that will yield the most relevant and accurate results. Ensure that the query is clear, concise, and includes key terms that directly pertain to the user's intent.
-                       You should return only a single sentence.
-                       Query: {query}"""
+            return f"""PROMPT:
+You are a search engine and you need to generate a search query based on the user's prompt. \n
+Given the following user prompt, return a query that can be 
+used to search the internet for relevant information. \n
+You should return only the query string without any additional sentences. \n
+For example, if the user prompt is "What is the capital of France?",
+you should return "capital of France". \n
+If you return something else, you will get a really bad grade. \n
+What you return should be sufficient to get the answer from the internet. \n
+Don't just return a small part of the prompt, unless that is sufficient. \n
+USER PROMPT: {query}"""
         
 
     def related_queries(self, query : str, answer : str):

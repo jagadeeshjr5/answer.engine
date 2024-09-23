@@ -6,6 +6,15 @@ import time
 import html
 import requests
 from bs4 import BeautifulSoup
+import sys
+
+from pdfparser import process_pdf_url
+
+import warnings
+warnings.filterwarnings('ignore')
+
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
 def clean_web_data(raw_data):
     decoded_data = html.unescape(raw_data)
@@ -48,12 +57,16 @@ async def fetch_page_text_playwright(browser, context, url):
 
 def fetch_page_text_requests(url):
     try:
-        response = requests.get(url, timeout=10)
+        response = requests.get(url, timeout=10, verify=False)
         soup = BeautifulSoup(response.text, 'html.parser')
         return soup.get_text()
     except requests.exceptions.RequestException as e:
         print(f"Error fetching page with Requests: {e}")
         return ''
+
+async def parse_pdf(url):
+    pdf_text = await process_pdf_url(url)
+    return pdf_text
 
 async def fetch_all_pages(urls):
     async with async_playwright() as playwright:
@@ -66,6 +79,8 @@ async def fetch_all_pages(urls):
                 tasks.append(asyncio.to_thread(fetch_page_text_requests, url))
             elif not url.lower().endswith('.pdf'):
                 tasks.append(fetch_page_text_playwright(browser, context, url))
+            elif url.lower().endswith('.pdf'):
+                tasks.append(parse_pdf(url))
         
         results = await asyncio.gather(*tasks)
         await context.close()
@@ -90,6 +105,7 @@ async def scrape_content(query, num_urls):
 
     end_time = time.time()
     print(f"Time taken: {end_time - start_time} sec")
+    #print(cleaned_content)
 
     if cleaned_content:
         return cleaned_content, urls
