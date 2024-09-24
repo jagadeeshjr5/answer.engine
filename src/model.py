@@ -27,7 +27,7 @@ class Model():
         self.operation = operation
         self.model = model
 
-        self.response_type = "application/json" if self.operation == 'related_queries' else None
+        self.response_type = "application/json" if self.operation in ['related_queries', 'search'] else None
 
         self.system_instruction = (
             pt.answer_systeminstruction() if self.operation == 'answer' 
@@ -37,7 +37,7 @@ class Model():
 
         genai.configure(api_key=api_key)
         generation_config = genai.types.GenerationConfig(
-            max_output_tokens=2000,
+            max_output_tokens=2500,
             temperature=1.0, response_mime_type=self.response_type
         )
         self.model = genai.GenerativeModel(
@@ -71,7 +71,8 @@ class Model():
         """
         messages = [{'role': 'user', 'parts': [pt.search_systeminstruction(query=query, history=history, enable_history=enable_history)]}]
         response = self.model.generate_content(messages)
-        return response.text
+        response = json.loads(response.text)
+        return response
     
 
     def answer(self, query, context):
@@ -95,3 +96,8 @@ class Model():
         response = self.model.generate_content(messages)
         response = json.loads(response.text)
         return response
+    
+
+#if __name__ == "__main__":
+#    model = Model(operation='search', model="gemini-1.5-flash", api_key=api_key1)
+#    search_query = model.search(query="What are different types of medical devices regulations in India and USA", history='', enable_history=False)

@@ -160,17 +160,23 @@ If the provided context is not relevant or empty then return ```I'm sorry! I cou
                         # Rewritten Query:
                         """
         else:
-            return f"""PROMPT:
-You are a search engine and you need to generate a search query based on the user's prompt. \n
-Given the following user prompt, return a query that can be 
-used to search the internet for relevant information. \n
-You should return only the query string without any additional sentences. \n
-For example, if the user prompt is "What is the capital of France?",
-you should return "capital of France". \n
-If you return something else, you will get a really bad grade. \n
-What you return should be sufficient to get the answer from the internet. \n
-Don't just return a small part of the prompt, unless that is sufficient. \n
-USER PROMPT: {query}"""
+            return f"""You are a query enhancement tool designed to improve user queries for Google search. Generate a main enhanced query and decide how many sub-queries to create based on the user's input to capture diverse perspectives and fully understand the user's intent.
+
+            You should always return the queries in a list.
+Example 1:
+
+User Query: "What are the benefits of yoga?"
+queries_list: ["What are the physical and mental health benefits of practicing yoga regularly?",
+"How does yoga improve flexibility and strength?",
+]
+
+User Query: "Nutritional facts about bananas and apples."
+queries_list: ["Nutritional facts of banana?",
+"Nutritional facts of apples?"]
+
+USER_QUERY: {query}
+
+"""
         
 
     def related_queries(self, query : str, answer : str):

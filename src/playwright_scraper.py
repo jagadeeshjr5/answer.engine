@@ -1,5 +1,4 @@
 from playwright.async_api import async_playwright
-from googlesearch import search
 import re
 import asyncio
 import time
@@ -8,7 +7,11 @@ import requests
 from bs4 import BeautifulSoup
 import sys
 
+import itertools
+
 from pdfparser import process_pdf_url
+
+from search import google_search
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -90,22 +93,17 @@ async def fetch_all_pages(urls):
 
 async def scrape_content(query, num_urls):
     start_time = time.time()
-    urls = []
-    
     try:
-        results = search(query, num_results=num_urls, lang="en")
+        urls = await google_search(query, num_results=num_urls, lang="en")
+        urls = list(itertools.chain(*urls))
     except Exception as e:
         print(f"Error during Google search: {e}")
-        
-    if results:
-        urls.extend(results)
     
     scraped_content = await fetch_all_pages(urls)
     cleaned_content = [clean_web_data(content) for content in scraped_content]
 
     end_time = time.time()
     print(f"Time taken: {end_time - start_time} sec")
-    #print(cleaned_content)
 
     if cleaned_content:
         return cleaned_content, urls

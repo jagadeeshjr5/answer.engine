@@ -49,7 +49,7 @@ os.system('playwright install')
 
 answer_color = "#c32148"
 
-st.markdown(f"<h1><span style='color:{answer_color};'>answer</span>.engine</h1>", unsafe_allow_html=True)
+st.markdown(f"<h1><span style='color:{answer_color};'>a</span>.E</h1>", unsafe_allow_html=True)
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -60,13 +60,13 @@ for message in st.session_state.messages:
     if message['role'] in ['user', 'assistant']:
         with st.chat_message(message["role"], avatar= f"{urls['user']}" if message["role"] == 'user' else f"{urls['pageicon']}"):
             st.markdown(message["parts"])
-    elif message["role"] == 'youtube_urls':
-        num_videos = len(message['youtube_urls'])
-        cols = st.columns(num_videos)
-        
-        for i, col in enumerate(cols):
-            with col:
-                st.video(message['youtube_urls'][i], autoplay=False, muted=True)
+    #elif message["role"] == 'youtube_urls':
+    #    num_videos = len(message['youtube_urls'])
+    #    cols = st.columns(num_videos)
+    #    
+    #    for i, col in enumerate(cols):
+    #        with col:
+    #            st.video(message['youtube_urls'][i], autoplay=False, muted=True)
     elif message['role'] == 'reference_links':
         with st.expander("See Reference Links"):
             for url in message['reference_links']:
@@ -105,8 +105,9 @@ st.caption(
 )
 
 with st.sidebar:
-    st.subheader("No. of references")
-    num_urls = st.slider(" ", min_value=1, max_value=10, value=5)
+    #st.subheader("No. of references")
+    #num_urls = st.slider(" ", min_value=1, max_value=10, value=5)
+    num_urls = 1
     st.subheader("Percentage of context to be used")
     context_percentage = st.slider(" ", min_value=0.1, max_value=1.0, value=0.75)
 
@@ -174,7 +175,7 @@ async def run_scraper(query, num_urls):
 
 async def process_query(prompt, num_urls, context_percentage, model, history):
     model = Model(operation='search', model=model, api_key=api_key1)
-    for _ in range(3):
+    for _ in range(2):
         search_query = model.search(query=prompt, history=history, enable_history=enable_history)
         scraped_content, urls = await run_scraper(search_query, num_urls)
         if scraped_content.strip():
@@ -195,62 +196,67 @@ if prompt := st.chat_input("Ask me!"):
 
     with st.chat_message("assistant", avatar=f"{urls['pageicon']}",):
         try:
-            with st.spinner("Processing..."):
-                start_time = time.time()
+            start_time = time.time()
+            with st.status("Processing..."):
+                
 
                 #loop = asyncio.ProactorEventLoop()
                 #asyncio.set_event_loop(loop)
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
+                st.write("Processing query")
+                st.write("Searching google")
                 search_query, context, reference_urls = loop.run_until_complete(process_query(prompt, num_urls, context_percentage, model=selected_model, history=history))
+
 
                 model = Model(operation='answer', model=selected_model, api_key=api_key2)
 
                 end_time = time.time()
                 runtime = end_time - start_time
+                st.write("Answering query")
 
-                st.write(f"{runtime:.2f} seconds")
-                output = model.answer(query=prompt, context=context)
-                output_str = st.write_stream(output, )
+            st.write(f"{runtime:.2f} seconds")
+            output = model.answer(query=prompt, context=context)
+            output_str = st.write_stream(output, )
 
-                video_urls = []
-                try:
+            video_urls = []
+            try:
 
-                    results = youtube_search(search_query)
+                results = youtube_search(search_query)
 
-                    if results:
-                        video_urls = [result['url'] for result in results]
+                if results:
+                    video_urls = [result['url'] for result in results]
 
-                        num_videos = len(video_urls)
-                        cols = st.columns(num_videos)
+                    num_videos = len(video_urls)
+                    cols = st.columns(num_videos)
 
-                        # Display videos in dynamically created columns
-                        for i, col in enumerate(cols):
-                            with col:
-                                st.video(video_urls[i], autoplay=True, muted=True)
-                except:
-                    pass
+                    # Display videos in dynamically created columns
+                    for i, col in enumerate(cols):
+                        with col:
+                            st.video(video_urls[i], autoplay=True, muted=True)
+            except:
+                pass
                 
-                with st.expander("See Reference Links"):
-                    for url in reference_urls:
-                        st.markdown(url, unsafe_allow_html=True)
+            with st.expander("See Reference Links"):
+                for url in reference_urls:
+                    st.markdown(url, unsafe_allow_html=True)
 
-                related = []
-                try:
-                    model = Model(operation='related_queries', model=selected_model, api_key=api_key3)
-                    related = model.related_queries(query=prompt, answer=output_str)
-                    with st.expander("Related"):
-                        if related:
-                            for rel in related:
-                                st.markdown(rel)
-                        else:
-                            st.markdown('none')
-                except Exception as e:
-                    pass      
+            related = []
+            try:
+                model = Model(operation='related_queries', model=selected_model, api_key=api_key3)
+                related = model.related_queries(query=prompt, answer=output_str)
+                with st.expander("Related"):
+                    if related:
+                        for rel in related:
+                            st.markdown(rel)
+                    else:
+                        st.markdown('none')
+            except Exception as e:
+                pass      
 
             st.session_state.messages.append({"role": "assistant", "parts": output_str})
-            if video_urls:
-                st.session_state.messages.append({"role": "youtube_urls", "youtube_urls": video_urls})
+            #if video_urls:
+                #st.session_state.messages.append({"role": "youtube_urls", "youtube_urls": video_urls})
             st.session_state.messages.append({"role": "reference_links", "reference_links": reference_urls})
             #if related:
             #    st.session_state.messages.append({"role": "related_queries", "related_queries": related})
