@@ -65,10 +65,10 @@ def install_playwright():
         #st.write("Playwright installation already completed.")
 
 # Place this at the start of your app to ensure it runs when the app is first loaded
-install_playwright()
+#install_playwright()
 
-os.system('playwright install-deps')
-os.system('playwright install')
+#os.system('playwright install-deps')
+#os.system('playwright install')
 
 
 
