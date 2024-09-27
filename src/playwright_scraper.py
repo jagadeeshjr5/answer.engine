@@ -27,8 +27,7 @@ driver = None
 def init_driver():
     global driver
     if driver is None:
-        service = Service("/usr/local/bin/chromedriver")  # Adjust to your environment
-        driver = webdriver.Chrome(service=service, options=chrome_options)
+        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
 def quit_driver():
     global driver
