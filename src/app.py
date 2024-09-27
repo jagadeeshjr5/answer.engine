@@ -6,12 +6,34 @@ import time
 import nest_asyncio
 import subprocess
 from scraper import scrape
-from playwright_scraper import scrape_content
+from playwright_scraper import scrape_all_queries
 
 import os
 
 from utils import youtube_search
 import shutil
+
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from bs4 import BeautifulSoup
+import time
+import itertools
+import concurrent.futures
+
+# Set up Selenium Chrome options
+chrome_options = Options()
+chrome_options.add_argument("--headless")
+chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("--disable-dev-shm-usage")
+chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+chrome_options.add_argument("--disable-extensions")
+chrome_options.add_argument("--disable-infobars")
+chrome_options.add_argument("--log-level=3")
 
 nest_asyncio.apply()
 
@@ -165,25 +187,41 @@ with st.sidebar:
         unsafe_allow_html=True
     )
 
-async def run_scraper(query, num_urls):
-    if selected_scraper == 'Basic':
-        scraped_content, urls = await scrape(query, num_urls)
-    elif selected_scraper == 'Advanced':
-        scraped_content, urls = await scrape_content(query, num_urls)
-    scraped_content, urls = await scrape(query, num_urls)
+import concurrent.futures
+
+def run_scraper(query, num_urls):
+    local_driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+    try:
+        if selected_scraper == 'Basic':
+            scraped_content, urls = scrape(query, num_urls)
+        elif selected_scraper == 'Advanced':
+            scraped_content, urls = scrape_all_queries(query, num_urls, driver=local_driver)
+            
+    finally:
+        local_driver.quit()  # Ensure the local driver is closed
     return scraped_content, urls
 
-async def process_query(prompt, num_urls, context_percentage, model, history):
+def process_query(prompt, num_urls, model, history):
     model = Model(operation='search', model=model, api_key=api_key1)
-    for _ in range(2):
+    
+    for _ in range(1):
         search_query = model.search(query=prompt, history=history, enable_history=enable_history)
-        scraped_content, urls = await run_scraper(search_query, num_urls)
+        
+        # Use ThreadPoolExecutor to run the scraper in a separate thread
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            future = executor.submit(run_scraper, search_query, num_urls)
+            scraped_content, urls = future.result()  # Wait for the result
+
         if scraped_content.strip():
             break
+            
     chunks = create_chunks(scraped_content)
-    context = await make_context(query=prompt, context=chunks, context_percentage=context_percentage)
     
-    return search_query, context, urls
+    return search_query, chunks, urls
+
+async def prepare_context(prompt, chunks, context_percentage=context_percentage):
+    context = await make_context(query=prompt, context=chunks, context_percentage=context_percentage)
+    return context
 
 
 if prompt := st.chat_input("Ask me!"):
@@ -206,8 +244,10 @@ if prompt := st.chat_input("Ask me!"):
                 asyncio.set_event_loop(loop)
                 st.write("Processing query")
                 st.write("Searching google")
-                search_query, context, reference_urls = loop.run_until_complete(process_query(prompt, num_urls, context_percentage, model=selected_model, history=history))
+                search_query, chunks, reference_urls = process_query(prompt, num_urls, model=selected_model, history=history)
 
+                context = loop.run_until_complete(prepare_context(search_query, chunks, context_percentage=context_percentage))
+            
 
                 model = Model(operation='answer', model=selected_model, api_key=api_key2)
 

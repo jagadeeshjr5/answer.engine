@@ -1,5 +1,6 @@
 import google.generativeai as genai
 from sentence_transformers.util import cos_sim
+#from sklearn.metrics.pairwise import cosine_similarity as cos_sim
 from datetime import datetime
 import streamlit as st
 import os
@@ -100,7 +101,9 @@ async def make_context(query : str, context : List[str], context_percentage : fl
     query_embedding = await get_embeddings(query)
     context_embeddings = await get_embeddings(context)
 
-    similarities = cos_sim([query_embedding], context_embeddings)
+    print(type(query_embedding))
+
+    similarities = cos_sim(query_embedding, context_embeddings)
 
     output_context = ''
     context_chunksize = round(context_percentage*len(context)) if len(context) < 20 else 10
@@ -160,7 +163,7 @@ If the provided context is not relevant or empty then return ```I'm sorry! I cou
                         # Rewritten Query:
                         """
         else:
-            return f"""You are a query enhancement tool designed to improve user queries for Google search. Generate a main enhanced query and decide how many sub-queries to create based on the user's input to capture diverse perspectives and fully understand the user's intent.
+            return f"""You are a query enhancement tool designed to improve user queries for Google search. Generate a main enhanced query and create 1 subquery based on the user's input to capture diverse perspectives and fully understand the user's intent.
 
             You should always return the queries in a list.
 Example 1:

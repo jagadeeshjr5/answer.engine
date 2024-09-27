@@ -72,7 +72,7 @@ class Model():
         messages = [{'role': 'user', 'parts': [pt.search_systeminstruction(query=query, history=history, enable_history=enable_history)]}]
         response = self.model.generate_content(messages)
         response = json.loads(response.text)
-        return response
+        return response[:1]
     
 
     def answer(self, query, context):
