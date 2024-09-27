@@ -69,6 +69,41 @@ install_playwright()
 os.system('playwright install-deps')
 os.system('playwright install')
 
+import subprocess
+
+def install_packages():
+    # List of packages to install
+    packages = [
+        "libxslt1.1",
+        "libwoff2-1",
+        "libevent-2.1-7",
+        "libopus0",
+        "libwebp6",
+        "libharfbuzz0b",
+        "libenchant-2-2",
+        "libsecret-1-0",
+        "libhyphen0",
+        "libgstreamer1.0-0",
+        "libgstreamer-plugins-base1.0-0",
+        "libflite1",
+        "libegl1",
+        "libgl1",
+        "libgles2",
+        "libx264-160"
+    ]
+
+    # Update package list
+    subprocess.run(["sudo", "apt", "update"], check=True)
+
+    # Install packages
+    subprocess.run(["sudo", "apt", "install", "-y"] + packages, check=True)
+
+try:
+    install_packages()
+except subprocess.CalledProcessError as e:
+    print(f"An error occurred while installing packages: {e}")
+
+
 answer_color = "#c32148"
 
 st.markdown(f"<h1><span style='color:{answer_color};'>a</span>.E</h1>", unsafe_allow_html=True)
