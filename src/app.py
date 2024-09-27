@@ -17,6 +17,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.core.os_manager import ChromeType
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -192,7 +193,7 @@ with st.sidebar:
 import concurrent.futures
 
 def run_scraper(query, num_urls):
-    local_driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+    local_driver = webdriver.Chrome(service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()), options=chrome_options)
     try:
         if selected_scraper == 'Basic':
             scraped_content, urls = scrape(query, num_urls)
