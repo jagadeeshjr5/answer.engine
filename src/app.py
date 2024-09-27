@@ -69,7 +69,7 @@ install_playwright()
 os.system('playwright install-deps')
 os.system('playwright install')
 
-@st.experimental_singleton
+@st.experimental_memo
 def get_driver():
     return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
