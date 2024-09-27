@@ -69,11 +69,10 @@ install_playwright()
 os.system('playwright install-deps')
 os.system('playwright install')
 
-def installff():
-  os.system('sbase install geckodriver')
-  os.system('ln -s /home/appuser/venv/lib/python3.7/site-packages/seleniumbase/drivers/geckodriver /home/appuser/venv/bin/geckodriver')
+@st.experimental_singleton
+def get_driver():
+    return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
-_ = installff()
 
 
 answer_color = "#c32148"
@@ -197,7 +196,7 @@ with st.sidebar:
 import concurrent.futures
 
 def run_scraper(query, num_urls):
-    local_driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+    local_driver = get_driver() #webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
     try:
         if selected_scraper == 'Basic':
             scraped_content, urls = scrape(query, num_urls)
