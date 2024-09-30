@@ -1,12 +1,11 @@
 import streamlit as st
 import asyncio
-from utils import create_chunks, get_embeddings, make_context, load_urls
+from utils import create_chunks, make_context, load_urls
 from model import Model, get_models
 import time
 import nest_asyncio
 import subprocess
-from scraper import scrape
-from playwright_scraper import scrape_all_queries
+from scraper import Scraper
 
 import os
 
@@ -19,12 +18,11 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.core.os_manager import ChromeType
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-from bs4 import BeautifulSoup
 import time
-import itertools
 import concurrent.futures
+
+scraper = Scraper()
+
 
 # Set up Selenium Chrome options
 chrome_options = Options()
@@ -69,7 +67,7 @@ def install_playwright():
 
 #os.system('playwright install-deps')
 #os.system('playwright install')
-
+###
 
 
 answer_color = "#c32148"
@@ -134,21 +132,22 @@ with st.sidebar:
     #num_urls = st.slider(" ", min_value=1, max_value=10, value=5)
     num_urls = 1
     st.subheader("Percentage of context to be used")
-    context_percentage = st.slider(" ", min_value=0.1, max_value=1.0, value=0.75)
+    #context_percentage = st.slider(" ", min_value=0.1, max_value=1.0, value=0.75)
+    context_percentage = 0.75
 
     st.markdown("---")
 
     #enable_history = st.toggle("Enable memory:", )
     enable_history = False
 
-    selected_scraper = st.radio(
-        "**Select scraper**",
-        ["Basic", "Advanced"],
-        captions=[
-            "Uses beautifulsoup",
-            "Uses playwright"
-        ],
-    )
+    #selected_scraper = st.radio(
+    #    "**Select scraper**",
+    #    ["Basic", "Advanced"],
+    #    captions=[
+    #        "Uses beautifulsoup",
+    #        "Uses playwright"
+    #    ],
+    #)
 
     #selected_model = st.sidebar.selectbox('**Choose a model:**', models, index=default_index)
     selected_model = 'gemini-1.5-flash'
@@ -193,15 +192,17 @@ with st.sidebar:
 import concurrent.futures
 
 def run_scraper(query, num_urls):
-    local_driver = webdriver.Chrome(service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()), options=chrome_options)
+    local_driver = webdriver.Chrome(service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()).install()), options=chrome_options)
+    #webdriver.Chrome(service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()), options=chrome_options)
     try:
-        if selected_scraper == 'Basic':
-            scraped_content, urls = scrape(query, num_urls)
-        elif selected_scraper == 'Advanced':
-            scraped_content, urls = scrape_all_queries(query, num_urls, driver=local_driver)
+    #    if selected_scraper == 'Basic':
+    #        scraped_content, urls = scrape(query, num_urls)
+    #    elif selected_scraper == 'Advanced':
+        scraped_content, urls = scraper.scrape_content(query, num_urls, driver=local_driver)
             
     finally:
-        local_driver.quit()  # Ensure the local driver is closed
+        local_driver.quit()
+          # Ensure the local driver is closed
     return scraped_content, urls
 
 def process_query(prompt, num_urls, model, history):
