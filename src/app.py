@@ -5,7 +5,7 @@ from model import Model, get_models
 import time
 import nest_asyncio
 import subprocess
-from scraper import Scraper
+from scraper import WebScraper
 
 import os
 
@@ -21,7 +21,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 import time
 import concurrent.futures
 
-scraper = Scraper()
+scraper = WebScraper()
 
 
 # Set up Selenium Chrome options

@@ -9,7 +9,7 @@ import concurrent.futures
 from typing import List, Tuple
 from selenium.webdriver.chrome.webdriver import WebDriver
 
-class Scraper():
+class WebScraper():
     def __init__(self, retries=1, delay=2):
         chrome_options = Options()
         chrome_options.add_argument("--headless")
