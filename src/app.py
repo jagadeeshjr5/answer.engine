@@ -131,11 +131,11 @@ with st.sidebar:
     #st.subheader("No. of references")
     #num_urls = st.slider(" ", min_value=1, max_value=10, value=5)
     num_urls = 1
-    st.subheader("Percentage of context to be used")
+    #st.subheader("Percentage of context to be used")
     #context_percentage = st.slider(" ", min_value=0.1, max_value=1.0, value=0.75)
     context_percentage = 0.75
 
-    st.markdown("---")
+    #st.markdown("---")
 
     #enable_history = st.toggle("Enable memory:", )
     enable_history = False
@@ -151,22 +151,11 @@ with st.sidebar:
 
     #selected_model = st.sidebar.selectbox('**Choose a model:**', models, index=default_index)
     selected_model = 'gemini-1.5-flash'
-
-    text_contents = ''
-    
-    for message in st.session_state.messages:
-        if message['role'] in ['user']:
-            text_contents += 'Query:\n' + message["parts"] + '\n\n'
-        elif message['role'] in ['assistant']:
-            text_contents += 'Response:\n' + message["parts"] + '\n\n'
-        elif message['role'] == 'reference_links':
-                for url in message['reference_links']:
-                    text_contents += 'Reference Links:\n' + url
     
 
     #st.download_button("Download chat", text_contents, type='primary', file_name='chat.txt',)
 
-    st.markdown("---")
+    #st.markdown("---")
 
     st.caption(
             """
@@ -189,7 +178,16 @@ with st.sidebar:
         unsafe_allow_html=True
     )
 
-import concurrent.futures
+text_contents = ''
+    
+for message in st.session_state.messages:
+    if message['role'] in ['user']:
+        text_contents += 'Query:\n' + message["parts"] + '\n\n'
+    elif message['role'] in ['assistant']:
+        text_contents += 'Response:\n' + message["parts"] + '\n\n'
+    elif message['role'] == 'reference_links':
+            for url in message['reference_links']:
+                text_contents += 'Reference Links:\n' + url
 
 def run_scraper(query, num_urls):
     local_driver = webdriver.Chrome(service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()), options=chrome_options)
