@@ -47,7 +47,7 @@ def create_chunks(text : str):
     chunks = [' '.join(tokens[i : i + chunk_size]) for i in range(0, len(tokens), step_size)]
     return chunks
 
-async def get_embeddings(text : List[str]):
+def get_embeddings(text : List[str]):
 
     """
     Creates embeddings for the raw text fecthed by the scraper from web.
@@ -60,7 +60,7 @@ async def get_embeddings(text : List[str]):
     
     """
     genai.configure(api_key=api_key)
-    embeddings = await genai.embed_content_async(
+    embeddings = genai.embed_content(
     model="models/embedding-001",
     content=text,
     task_type="clustering", output_dimensionality=128)
@@ -82,7 +82,7 @@ def parallel_embeddings(text_chunks: List[str]) -> List[np.ndarray]:
         embeddings = pool.map(get_embeddings, text_chunks)
     return embeddings
 
-async def make_context(query : str, context : List[str], context_percentage : float):
+def make_context(query : str, context : List[str], context_percentage : float):
 
     """
     Prepares the context for the LLM to answer the user query
@@ -98,10 +98,8 @@ async def make_context(query : str, context : List[str], context_percentage : fl
     """
 
 
-    query_embedding = await get_embeddings(query)
-    context_embeddings = await get_embeddings(context)
-
-    print(type(query_embedding))
+    query_embedding = get_embeddings(query)
+    context_embeddings = get_embeddings(context)
 
     similarities = cos_sim(query_embedding, context_embeddings)
 

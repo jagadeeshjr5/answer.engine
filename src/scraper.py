@@ -8,6 +8,7 @@ import concurrent.futures
 
 from typing import List, Tuple
 from selenium.webdriver.chrome.webdriver import WebDriver
+import threading
 
 class WebScraper():
     def __init__(self, retries=1, delay=2):
@@ -24,6 +25,9 @@ class WebScraper():
         self.delay = delay
         self.retries = retries
         
+        self.contents = []  # This will hold the scraped content
+        self.lock = threading.Lock()
+        
         #self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
   
     def quit_driver(self):
@@ -38,15 +42,16 @@ class WebScraper():
                 )
                 return driver.page_source
             except Exception as e:
-                print(f"Attempt {attempt + 1} failed for {url}: {e}")
+                #print(f"Attempt {attempt + 1} failed for {url}: {e}")
                 time.sleep(self.delay)
             
-        print(f"Failed to load {url} after {self.retries} retries.")
+        #print(f"Failed to load {url} after {self.retries} retries.")
         return None
         
     def scrape_url(self, url : str, driver : WebDriver) -> str:
+        self.contents = []
         if url.endswith(".pdf"):
-            print(f"Skipping PDF: {url}")
+            #print(f"Skipping PDF: {url}")
             return None
     
         html = self.load_page_with_retries(url, driver)
@@ -56,15 +61,33 @@ class WebScraper():
             for tag in soup(['nav', 'header', 'footer', 'aside', 'script', 'style', 'meta', 'noscript']):
                 tag.decompose()
             content = '\n'.join(tag.get_text(strip=True) for tag in soup.find_all(True))
+
+        with self.lock:
+            if content:  # Only add if content is not empty
+                self.contents.append({url: content})
     
-        return content
+        #return content
         
     def scrape_multiple_urls(self, urls : List, driver : WebDriver) -> List:
-        results = []
+        
+        #results = []
+        #for url in urls:
+        #    content = self.scrape_url(url, driver)
+        #    results.append(content)
+
+        threads = []
+    
+        # Create and start a thread for each URL
         for url in urls:
-            content = self.scrape_url(url, driver)
-            results.append(content)
-        return results
+            thread = threading.Thread(target=self.scrape_url, args=(url, driver))
+            threads.append(thread)
+            thread.start()
+    
+        # Wait for all threads to finish
+        for thread in threads:
+            thread.join()
+ 
+        return self.contents
 
     def fetch_search_results(self, query : str, num_results : int, lang : str) -> Tuple[str, List[str]]:
         urls = []
@@ -72,7 +95,8 @@ class WebScraper():
             results = search(query, num_results=num_results, lang=lang)
             urls.extend(results)
         except Exception as e:
-            print(f"An error occurred during search for query '{query}': {e}")
+            pass
+            #print(f"An error occurred during search for query '{query}': {e}")
         return query, urls
         
     def google_search(self, queries : List, num_results : int, lang='en') -> List:
@@ -85,25 +109,27 @@ class WebScraper():
                     result = future.result()  # Remove 'await' because it doesn't work with ThreadPoolExecutor
                     results.append(result)
                 except Exception as e:
-                    print(f"Error processing query '{query}': {e}")
+                    pass
+                    #print(f"Error processing query '{query}': {e}")
         urls = [url for query, url_list in results for url in url_list]
         return urls
         
     def scrape_content(self, queries : List, num_urls : int, driver : WebDriver) -> Tuple[str, List[str]]:
+        if not isinstance(queries, List):
+            raise TypeError(f"Expected List, got {type(queries).__name__}")
         start_time = time.time()
         urls = self.google_search(queries, num_urls)  # Pass driver if needed
-        print(f"Scraping the following URLs: {urls}")
+        #print(f"Scraping the following URLs: {urls}")
         scraped_content = self.scrape_multiple_urls(urls, driver)  # Pass driver to the scraping function
-        scraped_content = [text for text in scraped_content if text is not None]
-        scraped_content = '\n'.join(scraped_content)
+        scraped_content = '\n\n'.join(scraped_content[0].values())
+        #scraped_content = [text for text in scraped_content if text is not None]
+        #scraped_content = '\n'.join(scraped_content)
         end_time = time.time()
-        print(end_time - start_time)
+        #print(end_time - start_time)
         return scraped_content, urls
 
 #if __name__ == "__main__":
 #    c1 = Scraper()
 #    queries = ["who is the PM of India"]
 #    content, urls = c1.scrape_content(queries, 1)
-#    print(content[0:1000])
-
-
+#    #print(content[0:1000])
