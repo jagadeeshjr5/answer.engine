@@ -29,7 +29,8 @@ enable_history = False
 selected_model = 'gemini-1.5-flash'
 
 def run_scraper(query, num_urls):
-    local_driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+    local_driver = webdriver.Chrome(service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()), options=chrome_options)
+    #local_driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
     try:
         # Use the scraper from session state
         scraped_content, urls = scraper.scrape_content(query, num_urls, driver=local_driver)
