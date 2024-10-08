@@ -236,7 +236,7 @@ if __name__ == "__main__":
 
                     context = main(reference_urls, table_name)
                     context = '\n'.join(context)
-                    print(context[0:1000])
+                    st.write(context[0:1000])
 
                     #chunks, reference_urls = run_scraper_conc(search_query=search_query, num_urls=num_urls)
                     #context = prepare_context(search_query, chunks, context_percentage=context_percentage)
