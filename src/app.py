@@ -234,7 +234,7 @@ if __name__ == "__main__":
                     
                     search_query = process_query(prompt, model=selected_model, history=history)
 
-                    st.write("search_query: ", type(scrape.google_search))
+                    #st.write("search_query: ", type(scrape.google_search))
 
 
                     reference_urls = scrape.google_search(search_query, 2)
@@ -242,6 +242,13 @@ if __name__ == "__main__":
                     st.write("Reference urls: ", reference_urls)
 
                     st.write("Getting Information")
+
+                    reference_urls = [
+"https://en.wikipedia.org/wiki/List_of_prime_ministers_of_India"
+"https://www.pmindia.gov.in/en/pms-profile/"
+"https://en.wikipedia.org/wiki/Prime_Minister_of_India"
+"https://www.facebook.com/narendramodi/"
+]
 
                     context = main(reference_urls, table_name)
                     context = '\n'.join(context)
