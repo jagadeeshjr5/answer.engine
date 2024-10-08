@@ -93,7 +93,6 @@ def main(urls, table_name):
 
     cached_urls = st.session_state.get("cached_urls", fetch_urls_from_dynamodb(table))
     cached_content = st.session_state.get("cached_content", {})
-    st.write(cached_urls)
 
     print(len(cached_urls))
 
@@ -114,9 +113,11 @@ def main(urls, table_name):
         else:
             scrape_url.append(url)
 
+    st.write("urls: ", urls)
+
     if fetch_from_cache:
         fetched_content = fetch_content_from_dynamodb(table, fetch_from_cache)
-        st.write(fetched_content)
+        st.write("fetched_cache: ", fetched_content)
         output.append(fetched_content)
 
         cached_content.update(dict(zip(fetch_from_cache, fetched_content)))
