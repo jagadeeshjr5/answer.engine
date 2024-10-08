@@ -129,7 +129,9 @@ def main(urls, table_name):
     st.session_state["cached_urls"] = cached_urls.union(scrape_url)  # Add new URLs to cache
     st.session_state["cached_content"] = cached_content
 
-    if scrape_url:
+    if scrape_url and data_to_insert:
+        print("Writing to cache")
+        st.write("Writing to cache")
         run_writecache_script(table_name, data_to_insert, api_key)
 
 
