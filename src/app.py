@@ -58,9 +58,19 @@ def get_driver():
     return driver
 
 def run_scraper(urls : List):
+
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+    chrome_options.add_argument("--disable-extensions")
+    chrome_options.add_argument("--disable-infobars")
+    chrome_options.add_argument("--log-level=3")
     
     #local_driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
-    local_driver = get_driver() #webdriver.Chrome(service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()), options=chrome_options)
+    local_driver = webdriver.Chrome(service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()), options=chrome_options)
     try:
         # Use the scraper from session state
         scraped_content = scrape.scrape_content(urls, driver=local_driver)
