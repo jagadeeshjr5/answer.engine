@@ -244,9 +244,9 @@ if __name__ == "__main__":
                     st.write("Getting Information")
 
                     reference_urls = [
-"https://answerdotengine.streamlit.app/"
-"https://www.pmindia.gov.in/en/pms-profile/"
-"https://en.wikipedia.org/wiki/Prime_Minister_of_India"
+"https://answerdotengine.streamlit.app/", 
+"https://www.pmindia.gov.in/en/pms-profile/", 
+"https://en.wikipedia.org/wiki/Prime_Minister_of_India", 
 "https://www.facebook.com/narendramodi/"
 ]
 
