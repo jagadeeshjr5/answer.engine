@@ -91,9 +91,10 @@ def main(urls, table_name):
     dynamodb = boto3.resource('dynamodb')
     table = dynamodb.Table(table_name)
 
-    # Fetch cached URLs and initialize cached content if not already done
     cached_urls = st.session_state.get("cached_urls", fetch_urls_from_dynamodb(table))
     cached_content = st.session_state.get("cached_content", {})
+
+    print(cached_urls)
 
     fetch_from_cache = []
     scrape_url = []
@@ -101,48 +102,40 @@ def main(urls, table_name):
     
     for url in set(urls):
         if url.endswith(".pdf"):
-            continue  # Skip PDF URLs
+            continue
 
         if url in cached_urls:
-            # If URL is cached, check content cache
             content = cached_content.get(url)
             if content:
-                output.append({url: content})  # Fetch from Streamlit cache
+                output.append({url: content})
             else:
-                fetch_from_cache.append(url)  # Need to fetch from DynamoDB
+                fetch_from_cache.append(url)
         else:
-            scrape_url.append(url)  # URL not cached, need to scrape
+            scrape_url.append(url)
 
-    # Fetch content from DynamoDB for cached URLs
     if fetch_from_cache:
         fetched_content = fetch_content_from_dynamodb(table, fetch_from_cache)
         output.append(fetched_content)
 
-        # Update Streamlit cache with fetched content
         cached_content.update(dict(zip(fetch_from_cache, fetched_content)))
 
-    # Scrape content for URLs not in cache
     if scrape_url:
         scraped_content = run_scraper_conc(scrape_url)
         data_to_insert = {k: '\n'.join(set(v.split('\n'))) for d in scraped_content for k, v in d.items()}
         output.append(data_to_insert)
 
-        # Update Streamlit cache with scraped content
         cached_content.update(data_to_insert)
 
-    # Update session state
     st.session_state["cached_urls"] = cached_urls.union(scrape_url)  # Add new URLs to cache
     st.session_state["cached_content"] = cached_content
 
-    # Insert new data into DynamoDB
     if scrape_url:
         run_writecache_script(table_name, data_to_insert, api_key)
 
-    # Flatten and return the output
     return [item for sublist in output for item in (sublist if isinstance(sublist, list) else sublist.values())]
 
 #nest_asyncio.apply()
-table_name = 'adote-webdoccache' #os.environ["TABLE_NAME"] if "TABLE_NAME" in os.environ else st.secrets["TABLE_NAME"]
+table_name = os.environ["TABLE_NAME"] if "TABLE_NAME" in os.environ else st.secrets["TABLE_NAME"]
 api_key = os.environ["API_KEY"] if "API_KEY" in os.environ else st.secrets["API_KEY"]
 api_key1 = os.environ["API_KEY1"] if "API_KEY1" in os.environ else st.secrets["API_KEY1"]
 api_key2 = os.environ["API_KEY2"] if "API_KEY2" in os.environ else st.secrets["API_KEY2"]
