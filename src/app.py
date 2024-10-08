@@ -56,13 +56,10 @@ def get_driver():
     )
     return driver
 
-if 'driver' not in st.session_state:
-    st.session_state.driver = get_driver()
-
 def run_scraper(urls : List):
     
     #local_driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
-    local_driver = st.session_state.driver #webdriver.Chrome(service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()), options=chrome_options)
+    local_driver = get_driver #webdriver.Chrome(service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()), options=chrome_options)
     try:
         # Use the scraper from session state
         scraped_content = scrape.scrape_content(urls, driver=local_driver)
