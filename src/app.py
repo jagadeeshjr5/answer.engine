@@ -234,6 +234,9 @@ if __name__ == "__main__":
                     
                     search_query = process_query(prompt, model=selected_model, history=history)
 
+                    st.write("search_query: ", search_query)
+
+
                     reference_urls = scraper.google_search(search_query, 1)
 
                     st.write("Reference urls: ", reference_urls)
