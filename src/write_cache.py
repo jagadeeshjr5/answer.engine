@@ -5,14 +5,6 @@ import argparse
 import google.generativeai as genai
 import concurrent.futures
 
-import sys
-import pkg_resources
-
-print("Python executable:", sys.executable)
-print("Installed packages:", [d for d in pkg_resources.working_set])
-
-
-
 
 def insert_into_cache(table_name : str, data : dict):
     """
