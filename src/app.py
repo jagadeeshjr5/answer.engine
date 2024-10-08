@@ -234,10 +234,10 @@ if __name__ == "__main__":
                     
                     search_query = process_query(prompt, model=selected_model, history=history)
 
-                    st.write("search_query: ", type(scrape))
+                    st.write("search_query: ", type(scrape.google_search))
 
 
-                    reference_urls = scrape.google_search(search_query, 1)
+                    reference_urls = scrape.google_search(search_query, 2)
 
                     st.write("Reference urls: ", reference_urls)
 
