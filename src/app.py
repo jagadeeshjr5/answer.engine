@@ -26,12 +26,12 @@ urls = load_urls(r'src/urls.txt')
 st.set_page_config(
             page_title="answer.engine", page_icon=f"{urls['pageicon']}")
 
-#@st.cache_resource
-#def get_scraper():
-#    return WebScraper()
+@st.cache_resource
+def get_scraper():
+    return WebScraper()
 
 # Usage
-scrape = WebScraper()
+scrape = get_scraper()
 
 num_urls = 1
 context_percentage = 0.75
