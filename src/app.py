@@ -251,6 +251,8 @@ if __name__ == "__main__":
                     context = main(reference_urls, table_name)
                     context = '\n'.join(context)
 
+                    st.write("context: ", context)
+
                     
                     
 
