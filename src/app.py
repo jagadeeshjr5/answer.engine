@@ -26,12 +26,12 @@ urls = load_urls(r'src/urls.txt')
 st.set_page_config(
             page_title="answer.engine", page_icon=f"{urls['pageicon']}")
 
-#@st.cache_resource
-#def get_scraper():
-#    return WebScraper()
+@st.cache_resource
+def get_scraper():
+    return WebScraper()
 
 # Usage
-scrape = WebScraper()
+scrape = get_scraper()
 
 num_urls = 1
 context_percentage = 0.75
@@ -234,7 +234,7 @@ if __name__ == "__main__":
                     
                     search_query = process_query(prompt, model=selected_model, history=history)
 
-                    #st.write("search_query: ", type(scrape.google_search))
+                    st.write("search_query: ", type(scrape.google_search))
 
 
                     reference_urls = scrape.google_search(search_query, 2)
@@ -242,6 +242,7 @@ if __name__ == "__main__":
                     st.write("Reference urls: ", reference_urls)
 
                     st.write("Getting Information")
+
 
                     context = main(reference_urls, table_name)
                     context = '\n'.join(context)
