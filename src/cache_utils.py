@@ -90,4 +90,11 @@ def run_writecache_script(table_name: str, data_to_insert: dict, api_key : str):
         stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
 
+    stdout, stderr = process.communicate()
+    
+    if stderr:
+        st.error(f"Error writing to DynamoDB: {stderr.decode()}")
+    else:
+        st.success("Data written to DynamoDB successfully.")
+
     return process
