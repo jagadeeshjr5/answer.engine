@@ -57,8 +57,6 @@ def get_driver():
     )
     return driver
 
-st.write(get_driver())
-
 def run_scraper(urls : List):
     local_driver = get_driver() #webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
     #local_driver = webdriver.Chrome(service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()), options=chrome_options)
@@ -115,11 +113,8 @@ def main(urls, table_name):
         else:
             scrape_url.append(url)
 
-    st.write("urls: ", urls)
-
     if fetch_from_cache:
         fetched_content = fetch_content_from_dynamodb(table, fetch_from_cache)
-        st.write("fetched_cache: ", fetched_content)
         output.append(fetched_content)
 
         cached_content.update(dict(zip(fetch_from_cache, fetched_content)))
@@ -236,12 +231,8 @@ if __name__ == "__main__":
                     
                     search_query = process_query(prompt, model=selected_model, history=history)
 
-                    st.write("search_query: ", search_query)
-
 
                     reference_urls = scrape.google_search(search_query, 2)
-
-                    st.write("Reference urls: ", reference_urls)
 
                     st.write("Getting Information")
 
