@@ -70,7 +70,7 @@ def run_scraper(urls : List):
     chrome_options.add_argument("--log-level=3")
     
     #local_driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
-    local_driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+    local_driver = webdriver.Chrome(service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()), options=chrome_options)
     try:
         # Use the scraper from session state
         scraped_content = scrape.scrape_content(urls, driver=local_driver)
@@ -147,7 +147,7 @@ def main(urls, table_name):
     return [item for sublist in output for item in (sublist if isinstance(sublist, list) else sublist.values())]
 
 #nest_asyncio.apply()
-table_name = 'adote-webdoccache' #os.environ["TABLE_NAME"] if "TABLE_NAME" in os.environ else st.secrets["TABLE_NAME"]
+table_name = os.environ["TABLE_NAME"] if "TABLE_NAME" in os.environ else st.secrets["TABLE_NAME"]
 api_key = os.environ["API_KEY"] if "API_KEY" in os.environ else st.secrets["API_KEY"]
 api_key1 = os.environ["API_KEY1"] if "API_KEY1" in os.environ else st.secrets["API_KEY1"]
 api_key2 = os.environ["API_KEY2"] if "API_KEY2" in os.environ else st.secrets["API_KEY2"]
