@@ -57,6 +57,8 @@ def get_driver():
     )
     return driver
 
+st.write(get_driver())
+
 def run_scraper(urls : List):
     local_driver = get_driver() #webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
     #local_driver = webdriver.Chrome(service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()), options=chrome_options)
