@@ -94,7 +94,7 @@ def main(urls, table_name):
     cached_urls = st.session_state.get("cached_urls", fetch_urls_from_dynamodb(table))
     cached_content = st.session_state.get("cached_content", {})
 
-    print(cached_urls)
+    print(len(cached_urls))
 
     fetch_from_cache = []
     scrape_url = []
@@ -236,6 +236,7 @@ if __name__ == "__main__":
 
                     context = main(reference_urls, table_name)
                     context = '\n'.join(context)
+                    print(context[0:1000])
 
                     #chunks, reference_urls = run_scraper_conc(search_query=search_query, num_urls=num_urls)
                     #context = prepare_context(search_query, chunks, context_percentage=context_percentage)
