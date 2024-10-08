@@ -149,6 +149,7 @@ def main(urls, table_name):
 
     if scrape_url and data_to_insert:
         #print("Writing to cache")
+        st.write("Writing to cache")
         write_thread = threading.Thread(target=run_writecache, args=(table_name, data_to_insert, api_key))
         write_thread.start()
         st.write("Writing to cache")
