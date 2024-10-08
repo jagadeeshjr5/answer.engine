@@ -52,7 +52,7 @@ def get_driver():
     chrome_options.add_argument("--log-level=3")
     
     driver = webdriver.Chrome(
-        service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()).install()), 
+        service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()), 
         options=chrome_options
     )
     return driver
