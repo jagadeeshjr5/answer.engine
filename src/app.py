@@ -93,6 +93,7 @@ def main(urls, table_name):
 
     cached_urls = st.session_state.get("cached_urls", fetch_urls_from_dynamodb(table))
     cached_content = st.session_state.get("cached_content", {})
+    st.write(cached_urls)
 
     print(len(cached_urls))
 
@@ -131,6 +132,8 @@ def main(urls, table_name):
 
     if scrape_url:
         run_writecache_script(table_name, data_to_insert, api_key)
+
+    st.write(output)
 
     return [item for sublist in output for item in (sublist if isinstance(sublist, list) else sublist.values())]
 
@@ -235,7 +238,6 @@ if __name__ == "__main__":
                     st.write("Getting Information")
 
                     context = main(reference_urls, table_name)
-                    st.write("context: ", context[0:1000])
                     context = '\n'.join(context)
                     
 
