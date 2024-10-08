@@ -31,7 +31,7 @@ def get_scraper():
     return WebScraper()
 
 # Usage
-scraper = get_scraper()
+scrape = get_scraper()
 
 num_urls = 1
 context_percentage = 0.75
@@ -62,7 +62,7 @@ def run_scraper(urls : List):
     #local_driver = webdriver.Chrome(service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()), options=chrome_options)
     try:
         # Use the scraper from session state
-        scraped_content = scraper.scrape_content(urls, driver=local_driver)
+        scraped_content = scrape.scrape_content(urls, driver=local_driver)
     finally:
         local_driver.quit()
     return scraped_content
@@ -237,7 +237,7 @@ if __name__ == "__main__":
                     st.write("search_query: ", search_query)
 
 
-                    reference_urls = scraper.google_search(search_query, 1)
+                    reference_urls = scrape.google_search(search_query, 1)
 
                     st.write("Reference urls: ", reference_urls)
 
