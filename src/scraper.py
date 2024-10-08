@@ -11,7 +11,23 @@ from selenium.webdriver.chrome.webdriver import WebDriver
 import threading
 
 class WebScraper():
-    def __init__(self, retries=1, delay=2):
+    _instance = None  # Class-level attribute to store the single instance
+    
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super(WebScraper, cls).__new__(cls)
+        return cls._instance
+    
+    def __init__(self, retries : int = 1, delay : int = 2):
+
+        """
+        Initialize the WebScraper with the specified number of retries and delay between requests.
+
+        Args:
+            retries (int): Number of retries for loading a page.
+            delay (int): Delay in seconds between retries.
+        """
+
         chrome_options = Options()
         chrome_options.add_argument("--headless")
         #chrome_options.binary_location = "/usr/bin/google-chrome"
@@ -25,16 +41,29 @@ class WebScraper():
         self.delay = delay
         self.retries = retries
         
-        self.contents = []  # This will hold the scraped content
+        self.contents = []
         self.lock = threading.Lock()
         
         #self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
   
     def quit_driver(self):
+        """Quit the Selenium WebDriver instance."""
         self.driver.quit()
     
-    def load_page_with_retries(self, url : str, driver : WebDriver) -> str:
-        for attempt in range(self.retries):
+    def load_page_with_retries(self, url : str, driver : WebDriver):
+        """
+
+        Load a page with retries and wait until it's fully loaded.
+
+        Args:
+            url (str): The URL to load.
+            driver (WebDriver): The Selenium WebDriver instance.
+
+        Returns:
+            str: The page source if loaded successfully, else None.
+
+        """
+        for _ in range(self.retries):
             try:
                 driver.get(url)
                 WebDriverWait(driver, 20).until(
@@ -48,7 +77,19 @@ class WebScraper():
         #print(f"Failed to load {url} after {self.retries} retries.")
         return None
         
-    def scrape_url(self, url : str, driver : WebDriver) -> str:
+    def scrape_url(self, url : str, driver : WebDriver):
+        """
+
+        Scrape the content from a URL.
+
+        Args:
+            url (str): The URL to scrape.
+            driver (WebDriver): The Selenium WebDriver instance.
+
+        Returns:
+            str: The scraped content from the URL.
+
+        """
         self.contents = []
         if url.endswith(".pdf"):
             #print(f"Skipping PDF: {url}")
@@ -69,6 +110,18 @@ class WebScraper():
         #return content
         
     def scrape_multiple_urls(self, urls : List, driver : WebDriver) -> List:
+        """
+
+        Scrape multiple URLs concurrently using threads.
+
+        Args:
+            urls (List[str]): List of URLs to scrape.
+            driver (WebDriver): The Selenium WebDriver instance.
+
+        Returns:
+            List[dict]: List of dictionaries containing scraped content indexed by URL.
+
+        """
         
         #results = []
         #for url in urls:
@@ -90,6 +143,19 @@ class WebScraper():
         return self.contents
 
     def fetch_search_results(self, query : str, num_results : int, lang : str) -> Tuple[str, List[str]]:
+        """
+
+        Fetch search results for a given query.
+
+        Args:
+            query (str): The search query.
+            num_results (int): The number of search results to fetch.
+            lang (str): The language for search results.
+
+        Returns:
+            Tuple[str, List[str]]: The query and list of URLs from search results.
+
+        """
         urls = []
         try:
             results = search(query, num_results=num_results, lang=lang)
@@ -100,6 +166,19 @@ class WebScraper():
         return query, urls
         
     def google_search(self, queries : List, num_results : int, lang='en') -> List:
+        """
+
+        Perform Google searches for multiple queries concurrently.
+
+        Args:
+            queries (List[str]): List of search queries.
+            num_results (int): Number of results per query.
+            lang (str): Language for search results.
+
+        Returns:
+            List[str]: List of URLs from the search results.
+
+        """
         results = []
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = {executor.submit(self.fetch_search_results, query, num_results, lang='en'): query for query in queries}
@@ -114,19 +193,35 @@ class WebScraper():
         urls = [url for query, url_list in results for url in url_list]
         return urls
         
-    def scrape_content(self, queries : List, num_urls : int, driver : WebDriver) -> Tuple[str, List[str]]:
-        if not isinstance(queries, List):
-            raise TypeError(f"Expected List, got {type(queries).__name__}")
-        start_time = time.time()
-        urls = self.google_search(queries, num_urls)  # Pass driver if needed
+    def scrape_content(self, urls : List, driver : WebDriver) -> Tuple[str, List[str]]:
+        """
+
+        Scrape content from a list of URLs.
+
+        Args:
+            urls (List[str]): List of URLs to scrape.
+            driver (WebDriver): The Selenium WebDriver instance.
+
+        Returns:
+            List[dict]: List of dictionaries containing scraped content indexed by URL.
+
+        """
+        if not isinstance(urls, List):
+            raise TypeError(f"Expected List, got {type(urls).__name__}")
+        
+        #start_time = time.time()
+        #urls = self.google_search(queries, num_urls)  # Pass driver if needed
         #print(f"Scraping the following URLs: {urls}")
-        scraped_content = self.scrape_multiple_urls(urls, driver)  # Pass driver to the scraping function
-        scraped_content = '\n\n'.join(scraped_content[0].values())
+
+        scraped_content = self.scrape_multiple_urls(urls, driver)
+
+        #scraped_content = '\n\n'.join(scraped_content[0].values())
         #scraped_content = [text for text in scraped_content if text is not None]
         #scraped_content = '\n'.join(scraped_content)
-        end_time = time.time()
+        #end_time = time.time()
         #print(end_time - start_time)
-        return scraped_content, urls
+
+        return scraped_content
 
 #if __name__ == "__main__":
 #    c1 = Scraper()

@@ -1,14 +1,16 @@
 import streamlit as st
-import asyncio
-from utils import create_chunks, make_context, load_urls
-from model import Model, get_models
+from utils import load_urls
+from context import make_context
+from model import Model
 import time
-import nest_asyncio
 from scraper import WebScraper
+from typing import List
+import boto3
 
 import os
 
 from utils import youtube_search
+from cache_utils import fetch_urls_from_dynamodb, fetch_content_from_dynamodb, run_writecache_script
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -20,7 +22,16 @@ import time
 import concurrent.futures
 
 # Initialize the WebScraper in session state if it doesn't already exist
-scraper = WebScraper()
+urls = load_urls(r'src/urls.txt')
+st.set_page_config(
+            page_title="answer.engine", page_icon=f"{urls['pageicon']}")
+
+@st.cache_resource
+def get_scraper():
+    return WebScraper()
+
+# Usage
+scraper = get_scraper()
 
 num_urls = 1
 context_percentage = 0.75
@@ -28,15 +39,33 @@ enable_history = False
 
 selected_model = 'gemini-1.5-flash'
 
-def run_scraper(query, num_urls):
-    local_driver = webdriver.Chrome(service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()), options=chrome_options)
-    #local_driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+@st.cache_resource
+def get_driver():
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+    chrome_options.add_argument("--disable-extensions")
+    chrome_options.add_argument("--disable-infobars")
+    chrome_options.add_argument("--log-level=3")
+    
+    driver = webdriver.Chrome(
+        service=Service(ChromeDriverManager().install()), 
+        options=chrome_options
+    )
+    return driver
+
+def run_scraper(urls : List):
+    local_driver = get_driver() #webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+    #local_driver = webdriver.Chrome(service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()), options=chrome_options)
     try:
         # Use the scraper from session state
-        scraped_content, urls = scraper.scrape_content(query, num_urls, driver=local_driver)
+        scraped_content = scraper.scrape_content(urls, driver=local_driver)
     finally:
         local_driver.quit()
-    return scraped_content, urls
+    return scraped_content
 
 def process_query(prompt, model, history):
     model = Model(operation='search', model=model, api_key=api_key1)
@@ -45,46 +74,86 @@ def process_query(prompt, model, history):
     
     return search_query
 
-def run_scraper_conc(search_query, num_urls):
+def run_scraper_conc(urls : List):
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        future = executor.submit(run_scraper, search_query, num_urls)
-        scraped_content, urls = future.result()
+        future = executor.submit(run_scraper, urls)
+        scraped_content = future.result()
             
-    chunks = create_chunks(scraped_content)
+    #chunks = create_chunks(scraped_content)
 
-    return chunks, urls
+    return scraped_content
 
 def prepare_context(prompt, chunks, context_percentage=context_percentage):
     context = make_context(query=prompt, context=chunks, context_percentage=context_percentage)
     return context
 
-# Set up Selenium Chrome options
-chrome_options = Options()
-chrome_options.add_argument("--headless")
-chrome_options.add_argument("--no-sandbox")
-chrome_options.add_argument("--disable-dev-shm-usage")
-chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
-chrome_options.add_argument("--disable-extensions")
-chrome_options.add_argument("--disable-infobars")
-chrome_options.add_argument("--log-level=3")
+def main(urls, table_name):
+    dynamodb = boto3.resource('dynamodb')
+    table = dynamodb.Table(table_name)
 
-nest_asyncio.apply()
+    # Fetch cached URLs and initialize cached content if not already done
+    cached_urls = st.session_state.get("cached_urls", fetch_urls_from_dynamodb(table))
+    cached_content = st.session_state.get("cached_content", {})
 
+    fetch_from_cache = []
+    scrape_url = []
+    output = []
+    
+    for url in set(urls):
+        if url.endswith(".pdf"):
+            continue  # Skip PDF URLs
+
+        if url in cached_urls:
+            # If URL is cached, check content cache
+            content = cached_content.get(url)
+            if content:
+                output.append({url: content})  # Fetch from Streamlit cache
+            else:
+                fetch_from_cache.append(url)  # Need to fetch from DynamoDB
+        else:
+            scrape_url.append(url)  # URL not cached, need to scrape
+
+    # Fetch content from DynamoDB for cached URLs
+    if fetch_from_cache:
+        fetched_content = fetch_content_from_dynamodb(table, fetch_from_cache)
+        output.append(fetched_content)
+
+        # Update Streamlit cache with fetched content
+        cached_content.update(dict(zip(fetch_from_cache, fetched_content)))
+
+    # Scrape content for URLs not in cache
+    if scrape_url:
+        scraped_content = run_scraper_conc(scrape_url)
+        data_to_insert = {k: '\n'.join(set(v.split('\n'))) for d in scraped_content for k, v in d.items()}
+        output.append(data_to_insert)
+
+        # Update Streamlit cache with scraped content
+        cached_content.update(data_to_insert)
+
+    # Update session state
+    st.session_state["cached_urls"] = cached_urls.union(scrape_url)  # Add new URLs to cache
+    st.session_state["cached_content"] = cached_content
+
+    # Insert new data into DynamoDB
+    if scrape_url:
+        run_writecache_script(table_name, data_to_insert, api_key)
+
+    # Flatten and return the output
+    return [item for sublist in output for item in (sublist if isinstance(sublist, list) else sublist.values())]
+
+#nest_asyncio.apply()
+table_name = 'adote-webdoccache' #os.environ["TABLE_NAME"] if "TABLE_NAME" in os.environ else st.secrets["TABLE_NAME"]
 api_key = os.environ["API_KEY"] if "API_KEY" in os.environ else st.secrets["API_KEY"]
 api_key1 = os.environ["API_KEY1"] if "API_KEY1" in os.environ else st.secrets["API_KEY1"]
 api_key2 = os.environ["API_KEY2"] if "API_KEY2" in os.environ else st.secrets["API_KEY2"]
 api_key3 = os.environ["API_KEY3"] if "API_KEY3" in os.environ else st.secrets["API_KEY3"]
 
-urls = load_urls(r'src/urls.txt')
-
-models = get_models()
+#models = get_models()
 default_model = 'gemini-1.5-flash'
-default_index = models.index(default_model)
+#default_index = models.index(default_model)
 
 
 if __name__ == "__main__":
-    st.set_page_config(
-            page_title="answer.engine", page_icon=f"{urls['pageicon']}")
 
     answer_color = "#c32148"
 
@@ -162,19 +231,21 @@ if __name__ == "__main__":
             try:
                 start_time = time.time()
                 with st.status("Processing..."):
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
+                    #loop = asyncio.new_event_loop()
+                    #asyncio.set_event_loop(loop)
                     st.write("Processing query")
                     
                     search_query = process_query(prompt, model=selected_model, history=history)
 
-                    st.write("Scraping content")
+                    reference_urls = scraper.google_search(search_query, 1)
 
-                    chunks, reference_urls = run_scraper_conc(search_query=search_query, num_urls=num_urls)
+                    st.write("Getting Information")
 
-                    st.write("Preparing")
+                    context = main(reference_urls, table_name)
+                    context = '\n'.join(context)
 
-                    context = prepare_context(search_query, chunks, context_percentage=context_percentage)
+                    #chunks, reference_urls = run_scraper_conc(search_query=search_query, num_urls=num_urls)
+                    #context = prepare_context(search_query, chunks, context_percentage=context_percentage)
                 
                     model = Model(operation='answer', model=selected_model, api_key=api_key2)
 
