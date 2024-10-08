@@ -94,7 +94,7 @@ def main(urls, table_name):
     cached_urls = st.session_state.get("cached_urls", fetch_urls_from_dynamodb(table))
     cached_content = st.session_state.get("cached_content", {})
 
-    print(len(cached_urls))
+    #print(len(cached_urls))
 
     fetch_from_cache = []
     scrape_url = []
@@ -121,7 +121,6 @@ def main(urls, table_name):
 
     if scrape_url:
         scraped_content = run_scraper_conc(scrape_url)
-        st.write("scraped_content: ", scraped_content)
         data_to_insert = {k: '\n'.join(set(v.split('\n'))) for d in scraped_content for k, v in d.items()}
         output.append(data_to_insert)
 
@@ -130,7 +129,7 @@ def main(urls, table_name):
     st.session_state["cached_urls"] = cached_urls.union(scrape_url)  # Add new URLs to cache
     st.session_state["cached_content"] = cached_content
 
-    if scrape_url:
+    if scrape_url and data_to_insert:
         run_writecache_script(table_name, data_to_insert, api_key)
 
 
