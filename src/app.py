@@ -238,9 +238,10 @@ if __name__ == "__main__":
 
 
                     context = main(reference_urls, table_name)
+                    st.write("context: ", context)
                     context = '\n'.join(context)
 
-                    st.write(context[0:1000])
+                    
                     
 
                     #chunks, reference_urls = run_scraper_conc(search_query=search_query, num_urls=num_urls)
