@@ -121,7 +121,7 @@ def main(urls, table_name):
 
     if scrape_url:
         scraped_content = run_scraper_conc(scrape_url)
-        st.write(scraped_content)
+        st.write("scraped_content: ", scraped_content)
         data_to_insert = {k: '\n'.join(set(v.split('\n'))) for d in scraped_content for k, v in d.items()}
         output.append(data_to_insert)
 
