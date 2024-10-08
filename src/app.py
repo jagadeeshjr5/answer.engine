@@ -236,6 +236,8 @@ if __name__ == "__main__":
 
                     reference_urls = scraper.google_search(search_query, 1)
 
+                    st.write("Reference urls: ", reference_urls)
+
                     st.write("Getting Information")
 
                     context = main(reference_urls, table_name)
