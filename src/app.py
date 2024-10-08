@@ -7,6 +7,10 @@ from scraper import WebScraper
 from typing import List
 import boto3
 
+import threading
+
+from write_cache import insert_into_cache, transform
+
 import os
 
 from utils import youtube_search
@@ -38,6 +42,20 @@ context_percentage = 0.75
 enable_history = False
 
 selected_model = 'gemini-1.5-flash'
+
+def run_writecache(table_name: str, data_to_insert: dict, api_key: str):
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future_to_key = {executor.submit(transform, v, api_key): k for k, v in data_to_insert.items()}
+        data_to_insert = {}
+        for future in concurrent.futures.as_completed(future_to_key):
+            key = future_to_key[future]
+            try:
+                transformed_value = future.result()
+                data_to_insert[key] = transformed_value
+            except Exception as e:
+                pass
+
+    insert_into_cache(table_name, data_to_insert)
 
 def get_driver():
     chrome_options = webdriver.ChromeOptions()
@@ -132,7 +150,8 @@ def main(urls, table_name):
     if scrape_url and data_to_insert:
         print("Writing to cache")
         st.write("Writing to cache")
-        run_writecache_script(table_name, data_to_insert, api_key)
+        write_thread = threading.Thread(target=run_writecache, args=(table_name, data_to_insert, api_key))
+        write_thread.start()
 
 
     return [item for sublist in output for item in (sublist if isinstance(sublist, list) else sublist.values())]
