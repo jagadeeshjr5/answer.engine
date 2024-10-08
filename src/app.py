@@ -116,6 +116,7 @@ def main(urls, table_name):
 
     if fetch_from_cache:
         fetched_content = fetch_content_from_dynamodb(table, fetch_from_cache)
+        st.write(fetched_content)
         output.append(fetched_content)
 
         cached_content.update(dict(zip(fetch_from_cache, fetched_content)))
@@ -133,7 +134,6 @@ def main(urls, table_name):
     if scrape_url:
         run_writecache_script(table_name, data_to_insert, api_key)
 
-    st.write(output)
 
     return [item for sublist in output for item in (sublist if isinstance(sublist, list) else sublist.values())]
 
