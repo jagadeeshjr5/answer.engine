@@ -125,7 +125,7 @@ def main(urls, table_name):
 
     if scrape_url:
         st.write("Started scraping")
-        scraped_content = run_scraper_conc(scrape_url)
+        scraped_content = run_scraper(scrape_url)
         st.write("Scraping done")
         data_to_insert = {k: '\n'.join(set(v.split('\n'))) for d in scraped_content for k, v in d.items()}
         output.append(data_to_insert)
@@ -247,7 +247,7 @@ if __name__ == "__main__":
 
                     context = main(reference_urls, table_name)
                     context = '\n'.join(context)
-                    #st.write(context[:1000])
+                    st.write(context[:250])
 
                     #chunks, reference_urls = run_scraper_conc(search_query=search_query, num_urls=num_urls)
                     #context = prepare_context(search_query, chunks, context_percentage=context_percentage)
