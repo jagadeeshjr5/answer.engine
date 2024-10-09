@@ -9,8 +9,6 @@ import boto3
 
 import threading
 
-from write_cache import insert_into_cache, transform
-
 import os
 
 from utils import youtube_search
@@ -43,19 +41,7 @@ enable_history = False
 
 selected_model = 'gemini-1.5-flash'
 
-def run_writecache(table_name: str, data_to_insert: dict, api_key: str):
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        future_to_key = {executor.submit(transform, v, api_key): k for k, v in data_to_insert.items()}
-        data_to_insert = {}
-        for future in concurrent.futures.as_completed(future_to_key):
-            key = future_to_key[future]
-            try:
-                transformed_value = future.result()
-                data_to_insert[key] = transformed_value
-            except Exception as e:
-                pass
 
-    insert_into_cache(table_name, data_to_insert)
 
 def get_driver():
     chrome_options = webdriver.ChromeOptions()
@@ -149,16 +135,14 @@ def main(urls, table_name):
 
     if scrape_url and data_to_insert:
         #print("Writing to cache")
+        st.write("Writing to cache started")
+        run_writecache_script(table_name, data_to_insert, api_key)
         st.write("Writing to cache")
-        write_thread = threading.Thread(target=run_writecache, args=(table_name, data_to_insert, api_key))
-        write_thread.start()
-        st.write("Writing to cache")
-
 
     return [item for sublist in output for item in (sublist if isinstance(sublist, list) else sublist.values())]
 
 #nest_asyncio.apply()
-table_name = os.environ["TABLE_NAME"] if "TABLE_NAME" in os.environ else st.secrets["TABLE_NAME"]
+table_name = 'adote-webdoccache'#os.environ["TABLE_NAME"] if "TABLE_NAME" in os.environ else st.secrets["TABLE_NAME"]
 api_key = os.environ["API_KEY"] if "API_KEY" in os.environ else st.secrets["API_KEY"]
 api_key1 = os.environ["API_KEY1"] if "API_KEY1" in os.environ else st.secrets["API_KEY1"]
 api_key2 = os.environ["API_KEY2"] if "API_KEY2" in os.environ else st.secrets["API_KEY2"]
@@ -261,7 +245,7 @@ if __name__ == "__main__":
 
                     context = main(reference_urls, table_name)
                     context = '\n'.join(context)
-                    
+                    #st.write(context[:1000])
 
                     #chunks, reference_urls = run_scraper_conc(search_query=search_query, num_urls=num_urls)
                     #context = prepare_context(search_query, chunks, context_percentage=context_percentage)

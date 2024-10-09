@@ -2,6 +2,7 @@ import subprocess
 import tempfile
 
 import json
+import sys
 
 import os
 import streamlit as st
@@ -86,8 +87,23 @@ def run_writecache_script(table_name: str, data_to_insert: dict, api_key : str):
 
     # Pass the temporary file path as an argument to the subprocess
     process = subprocess.Popen(
-        ['python', 'src/write_cache.py', '--table_name', table_name, '--data_file', temp_file_path, '--api_key', api_key],
+        [f"{sys.executable}", 'src/write_cache.py', '--table_name', table_name, '--data_file', temp_file_path, '--api_key', api_key],
         stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
 
     return process
+
+
+def run_writecache(table_name: str, data_to_insert: dict, api_key: str):
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future_to_key = {executor.submit(transform, v, api_key): k for k, v in data_to_insert.items()}
+        data_to_insert = {}
+        for future in concurrent.futures.as_completed(future_to_key):
+            key = future_to_key[future]
+            try:
+                transformed_value = future.result()
+                data_to_insert[key] = transformed_value
+            except Exception as e:
+                pass
+
+    insert_into_cache(table_name, data_to_insert)
