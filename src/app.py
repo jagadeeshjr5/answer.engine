@@ -124,7 +124,9 @@ def main(urls, table_name):
         cached_content.update(dict(zip(fetch_from_cache, fetched_content)))
 
     if scrape_url:
+        st.write("Started scraping")
         scraped_content = run_scraper_conc(scrape_url)
+        st.write("Scraping done")
         data_to_insert = {k: '\n'.join(set(v.split('\n'))) for d in scraped_content for k, v in d.items()}
         output.append(data_to_insert)
 
