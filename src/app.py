@@ -63,12 +63,9 @@ def get_driver():
 def run_scraper(urls : List):
     
     #local_driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
-    local_driver = get_driver() #webdriver.Chrome(service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()), options=chrome_options)
-    try:
+    #local_driver = #get_driver() #webdriver.Chrome(service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()), options=chrome_options)
         # Use the scraper from session state
-        scraped_content = scrape.scrape_content(urls, driver=local_driver)
-    finally:
-        local_driver.quit()
+    scraped_content = scrape.scrape_content(urls)
     return scraped_content
 
 def process_query(prompt, model, history):
@@ -247,7 +244,7 @@ if __name__ == "__main__":
 
                     context = main(reference_urls, table_name)
                     context = '\n'.join(context)
-                    st.write(context[:250])
+                    #st.write(context[:250])
 
                     #chunks, reference_urls = run_scraper_conc(search_query=search_query, num_urls=num_urls)
                     #context = prepare_context(search_query, chunks, context_percentage=context_percentage)
